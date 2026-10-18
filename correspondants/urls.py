@@ -38,6 +38,16 @@ urlpatterns = [
         name="capability_preview",
     ),
     path(
+        "correspondants/<str:name>/capabilities/<str:capability_name>/samples/add",
+        views.sample_mail_add,
+        name="sample_mail_add",
+    ),
+    path(
+        "correspondants/<str:name>/capabilities/<str:capability_name>/samples/<int:sample_id>/delete",
+        views.sample_mail_delete,
+        name="sample_mail_delete",
+    ),
+    path(
         "api/correspondants/<str:name>/capacities",
         api.capacities,
         name="capacities",

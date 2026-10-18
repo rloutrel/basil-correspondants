@@ -221,3 +221,35 @@ msgid "New capability"
 msgstr ""
 msgid "Delete this capability?"
 msgstr ""
+msgid "Sample mails"
+msgstr ""
+
+msgid "Saved for future tests; run each one to see the result."
+msgstr ""
+
+msgid "Show the mail"
+msgstr ""
+
+msgid "Run"
+msgstr ""
+
+msgid "Delete this sample mail?"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Notification mail"
+msgstr ""
+
+msgid "New sample mail (JSON or raw email)"
+msgstr ""
+
+msgid "Save the capability first to attach sample mails."
+msgstr ""
+
+msgid "Save the sample mail"
+msgstr ""
+
+msgid "The result appears here."
+msgstr ""

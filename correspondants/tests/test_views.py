@@ -217,7 +217,7 @@ class CapabilityCrudTests(TestCase):
         self.assertContains(response, "accordion")
         self.assertContains(response, "parse-project-mail")
         self.assertContains(response, "PRJ-")
-        self.assertContains(response, 'name="sample_mail_1"')
+        self.assertContains(response, 'name="sample_content"')
 
     def test_delete_capability(self):
         Capability.objects.create(
@@ -287,85 +287,111 @@ class CapabilityPreviewTests(TestCase):
             name="freelancermap-pobox-notification",
             config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
         )
-        self.url = reverse("correspondants:capability_preview", args=["freelancermap"])
+        self.config_json = json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG)
         fixture = json.loads(
             (Path(__file__).parent / "fixtures" / "pobox" / "pobox_1.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.sample = json.dumps(fixture)
+        self.sample_content = json.dumps(fixture)
+        self.preview_url = reverse(
+            "correspondants:capability_preview", args=["freelancermap"]
+        )
 
-    def preview(self, config, sample_1=None, sample_2=None):
-        return self.client.post(self.url, {
-            "config": config,
-            "sample_mail_1": sample_1 if sample_1 is not None else self.sample,
-            "sample_mail_2": sample_2 or "",
+    def test_sample_mail_saved_and_listed(self):
+        from correspondants.models import CapabilitySampleMail
+
+        response = self.client.post(
+            reverse(
+                "correspondants:sample_mail_add",
+                args=["freelancermap", "freelancermap-pobox-notification"],
+            ),
+            {"sample_label": "Notification", "sample_content": self.sample_content},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CapabilitySampleMail.objects.count(), 1)
+        sample = CapabilitySampleMail.objects.get()
+        self.assertEqual(sample.label, "Notification")
+        self.assertContains(response, "sample-row")
+
+    def test_sample_mail_delete(self):
+        from correspondants.models import CapabilitySampleMail
+
+        sample = CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:sample_mail_delete",
+                args=["freelancermap", "freelancermap-pobox-notification", sample.pk],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CapabilitySampleMail.objects.count(), 0)
+
+    def test_preview_on_saved_sample(self):
+        from correspondants.models import CapabilitySampleMail
+
+        sample = CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.post(self.preview_url, {
+            "config": self.config_json,
+            "sample_id": str(sample.pk),
+            "sample_content": "",
         })
-
-    def test_preview_with_valid_config_and_sample(self):
-        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
-
-        response = self.preview(json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "matched_template")
         self.assertContains(response, "4995147")
 
-    def test_preview_with_two_samples(self):
-        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
-
-        sample_2 = json.loads(
-            (Path(__file__).parent / "fixtures" / "pobox" / "pobox_2.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        response = self.preview(
-            json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
-            sample_2=json.dumps(sample_2),
-        )
+    def test_preview_on_unsaved_content(self):
+        response = self.client.post(self.preview_url, {
+            "config": self.config_json,
+            "sample_content": self.sample_content,
+        })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "4995147")
-        self.assertContains(response, "4993600")
+        self.assertContains(response, "matched_template")
 
     def test_preview_with_invalid_json_config(self):
-        response = self.preview("{not json")
+        response = self.client.post(self.preview_url, {
+            "config": "{not json",
+            "sample_content": self.sample_content,
+        })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Invalid JSON")
 
     def test_preview_with_schema_invalid_config(self):
-        response = self.preview(json.dumps({"match": {}}))
+        response = self.client.post(self.preview_url, {
+            "config": json.dumps({"match": {}}),
+            "sample_content": self.sample_content,
+        })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "missing required property")
 
-    def test_preview_with_invalid_sample_shows_error(self):
-        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
-
-        response = self.preview(
-            json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
-            sample_1="{not json",
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Invalid JSON")
-
     def test_preview_get_not_allowed(self):
-        response = self.client.get(self.url)
+        response = self.client.get(self.preview_url)
         self.assertEqual(response.status_code, 405)
 
-    def test_list_accordion_contains_live_test(self):
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Live test")
-        self.assertContains(response, 'name="sample_mail_1"')
-        self.assertContains(response, 'name="sample_mail_2"')
-
     def test_preview_accepts_typographic_quotes(self):
-        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
-
-        curly_sample = self.sample.replace('"', "\u201c")
-        curly_config = json.dumps(
-            FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
-        ).replace('"', "\u201c")
-        response = self.preview(curly_config, sample_1=curly_sample)
+        curly_sample = self.sample_content.replace('"', "\u201c")
+        curly_config = self.config_json.replace('"', "\u201c")
+        response = self.client.post(self.preview_url, {
+            "config": curly_config,
+            "sample_content": curly_sample,
+        })
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Invalid JSON")
         self.assertContains(response, "matched_template")
         self.assertContains(response, "4995147")
+
+    def test_list_renders_sample_run_button(self):
+        from correspondants.models import CapabilitySampleMail
+
+        CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Run")
+        self.assertContains(response, "spinner")
+        self.assertContains(response, 'name="sample_content"')

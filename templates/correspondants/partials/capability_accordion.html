@@ -61,29 +61,65 @@
   </details>
 
   <div class="preview-section">
-    <h3>{% trans "Live test" %}</h3>
-    <p class="muted">{% trans "Enter one or two sample mails; the result updates as you edit." %}</p>
-    <div class="inline-fields">
-      <label class="inline-field span-6">
-        <span class="inline-label">{% trans "Sample mail 1 (JSON or raw email)" %}</span>
-        <textarea name="sample_mail_1" rows="5"
-                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
-                  hx-trigger="change delay:500ms"
-                  hx-include="closest form"
-                  hx-target="closest .accordion-body .preview-results">{% if draft_values %}{{ draft_values.sample_mail_1 }}{% endif %}</textarea>
-      </label>
-      <label class="inline-field span-6">
-        <span class="inline-label">{% trans "Sample mail 2 (JSON or raw email)" %}</span>
-        <textarea name="sample_mail_2" rows="5"
-                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
-                  hx-trigger="change delay:500ms"
-                  hx-include="closest form"
-                  hx-target="closest .accordion-body .preview-results">{% if draft_values %}{{ draft_values.sample_mail_2 }}{% endif %}</textarea>
-      </label>
-    </div>
-    <div class="preview-results">
-      <p class="muted">{% trans "The result appears here as you type." %}</p>
-    </div>
+    <h3>{% trans "Sample mails" %}</h3>
+    <p class="muted">{% trans "Saved for future tests; run each one to see the result." %}</p>
+
+    {% if capability %}
+      {% for sample in capability.sample_mails.all %}
+        <div class="sample-row">
+          <div class="sample-content">
+            <div class="sample-label">{{ sample.label|default:sample.pk }}</div>
+            <details class="sample-details">
+              <summary>{% trans "Show the mail" %}</summary>
+              <pre class="sample-raw">{{ sample.content }}</pre>
+            </details>
+          </div>
+          <div class="sample-result" id="sample-result-{{ sample.pk }}">
+            <button type="button" class="btn small"
+                    hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                    hx-include="closest form, [name='sample_id-{{ sample.pk }}']"
+                    hx-vals='{"sample_id": "{{ sample.pk }}"}'
+                    hx-target="#sample-result-{{ sample.pk }}"
+                    hx-swap="innerHTML"
+                    hx-indicator="#sample-spinner-{{ sample.pk }}">
+              {% trans "Run" %}
+            </button>
+            <span id="sample-spinner-{{ sample.pk }}" class="htmx-indicator spinner"></span>
+          </div>
+          <form class="inline-form"
+                hx-post="{% url 'correspondants:sample_mail_delete' correspondant_name capability.name sample.pk %}"
+                hx-target="#correspondant-list" hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="btn small danger"
+                    hx-confirm="{% trans 'Delete this sample mail?' %}">{% trans "Delete" %}</button>
+          </form>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form class="sample-add"
+          {% if capability %}
+            hx-post="{% url 'correspondants:sample_mail_add' correspondant_name capability.name %}"
+          {% endif %}
+          hx-target="#correspondant-list" hx-swap="innerHTML">
+      {% csrf_token %}
+      {% if not capability %}
+        <p class="muted">{% trans "Save the capability first to attach sample mails." %}</p>
+      {% endif %}
+      <div class="inline-fields">
+        <label class="inline-field span-3">
+          <span class="inline-label">{% trans "Label" %}</span>
+          <input type="text" name="sample_label" placeholder="{% trans 'Notification mail' %}">
+        </label>
+        <label class="inline-field span-9">
+          <span class="inline-label">{% trans "New sample mail (JSON or raw email)" %}</span>
+          <textarea name="sample_content" rows="4" {% if not capability %}disabled{% endif %}></textarea>
+        </label>
+      </div>
+      {% if capability %}
+        <button type="submit" class="btn small">{% trans "Save the sample mail" %}</button>
+      {% endif %}
+    </form>
   </div>
 
   <div class="inline-actions">

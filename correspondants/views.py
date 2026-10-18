@@ -7,7 +7,12 @@ from django.utils.translation import gettext as _
 
 from .engines import CapabilityError, execute_capability
 from .forms import CapabilityForm, CorrespondantForm
-from .models import Capability, CapabilityType, Correspondant
+from .models import (
+    Capability,
+    CapabilitySampleMail,
+    CapabilityType,
+    Correspondant,
+)
 from .schemas import SchemaValidationError
 
 CLOSE_EVENT = "close-overlay"
@@ -134,85 +139,120 @@ def capability_delete(request, name, capability_name):
     )
 
 
-def capability_preview(request, name, capability_name=None):
-    """Live preview of a parse-mail capability while editing its config.
-
-    Receives the draft config and one or two sample mails; runs the draft
-    against each sample and returns the results as JSON. Deterministic: same
-    inputs, same outputs; no external dependency. Used by the capability
-    form (HTMX, triggered on config change) so the author sees the effect of
-    the template immediately.
-    """
-    if request.method != "POST":
-        return HttpResponse(status=405)
-    config_raw = request.POST.get("config", "").strip()
-    mails = [
-        request.POST.get("sample_mail_1", "").strip(),
-        request.POST.get("sample_mail_2", "").strip(),
-    ]
-    errors = []
+def _draft_capability(request, name, capability_name, config_raw, errors):
+    """Build an unsaved capability from the posted config for previewing."""
     config = None
     try:
         config = json.loads(_normalize_json_quotes(config_raw))
     except json.JSONDecodeError as exc:
         errors.append(_("Invalid JSON: %(error)s") % {"error": exc})
-    if config is not None and capability_name:
+        return None
+    if capability_name:
         capability = get_object_or_404(
             Capability.objects.select_related("capability_type", "correspondant"),
             correspondant__name=name,
             name=capability_name,
         )
-    elif config is not None:
+    else:
         capability = Capability(
             correspondant=get_object_or_404(Correspondant, name=name),
             capability_type=CapabilityType.objects.get(slug="parse-mail"),
             name="draft",
         )
-    else:
-        capability = None
-    if capability is not None and config is not None:
-        capability.config = config
-        try:
-            capability.full_clean(
-                exclude=["correspondant", "capability_type", "name", "enabled",
-                         "priority", "description"]
-            )
-        except ValidationError as exc:
-            if hasattr(exc, "message_dict"):
-                for field_errors in exc.message_dict.values():
-                    if isinstance(field_errors, list):
-                        errors.extend(str(e) for e in field_errors)
-                    else:
-                        errors.append(str(field_errors))
-            else:
-                errors.extend(str(e) for e in exc.error_list)
-    results = []
-    if not errors:
-        from .engines import run_parse_mail
+    capability.config = config
+    try:
+        capability.full_clean(
+            exclude=["correspondant", "capability_type", "name", "enabled",
+                     "priority", "description"]
+        )
+    except ValidationError as exc:
+        if hasattr(exc, "message_dict"):
+            for field_errors in exc.message_dict.values():
+                if isinstance(field_errors, list):
+                    errors.extend(str(e) for e in field_errors)
+                else:
+                    errors.append(str(field_errors))
+        else:
+            errors.extend(str(e) for e in exc.error_list)
+        return None
+    return capability
 
-        draft = capability
-        for index, mail_text in enumerate(mails, start=1):
-            if not mail_text:
-                continue
-            payload, parse_error = _parse_mail_test_input(mail_text)
-            if parse_error:
-                results.append(
-                    {"sample": index, "error": str(parse_error)}
-                )
-                continue
+
+def capability_preview(request, name, capability_name=None):
+    """Run the draft config against one sample mail and return the result.
+
+    The sample is either a saved sample mail (sample_id) or raw posted
+    content (sample_content). Deterministic; no external dependency.
+    """
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    errors = []
+    capability = _draft_capability(
+        request, name, capability_name,
+        request.POST.get("config", ""), errors,
+    )
+    sample_label = ""
+    sample_content = ""
+    sample_id = request.POST.get("sample_id", "")
+    if sample_id:
+        sample = get_object_or_404(
+            CapabilitySampleMail, pk=sample_id,
+            capability__correspondant__name=name,
+        )
+        sample_label = sample.label
+        sample_content = sample.content
+    else:
+        sample_content = request.POST.get("sample_content", "").strip()
+        sample_label = request.POST.get("sample_label", "")
+    result = None
+    if capability is not None and sample_content:
+        payload, parse_error = _parse_mail_test_input(sample_content)
+        if parse_error:
+            errors.append(str(parse_error))
+        else:
+            from .engines import run_parse_mail
+
             try:
-                output = run_parse_mail([draft], payload)
-                results.append({
-                    "sample": index,
-                    "output": json.dumps(output, indent=2, ensure_ascii=False),
-                })
+                output = run_parse_mail([capability], payload)
+                result = json.dumps(output, indent=2, ensure_ascii=False)
             except CapabilityError as exc:
-                results.append({"sample": index, "error": str(exc)})
+                errors.append(str(exc))
     return render(
         request,
         "correspondants/partials/preview_results.html",
-        {"errors": errors, "results": results},
+        {"errors": errors, "result": result, "label": sample_label},
     )
+
+
+def sample_mail_add(request, name, capability_name):
+    """Save a sample mail attached to a capability for future tests."""
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    capability = get_object_or_404(
+        Capability, correspondant__name=name, name=capability_name
+    )
+    content = request.POST.get("sample_content", "").strip()
+    if content:
+        position = capability.sample_mails.count()
+        CapabilitySampleMail.objects.create(
+            capability=capability,
+            label=request.POST.get("sample_label", "").strip(),
+            content=content,
+            position=position,
+        )
+    return _list_refresh(request)
+
+
+def sample_mail_delete(request, name, capability_name, sample_id):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    sample = get_object_or_404(
+        CapabilitySampleMail, pk=sample_id,
+        capability__correspondant__name=name,
+        capability__name=capability_name,
+    )
+    sample.delete()
+    return _list_refresh(request)
 
 
 def _parse_mail_test_input(mail_text):

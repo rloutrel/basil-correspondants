@@ -242,3 +242,35 @@ msgid "New capability"
 msgstr "Nouvelle capacité"
 msgid "Delete this capability?"
 msgstr "Supprimer cette capacité ?"
+msgid "Sample mails"
+msgstr "Mails types"
+
+msgid "Saved for future tests; run each one to see the result."
+msgstr "Enregistrés pour de futurs tests ; lancez chacun pour voir le résultat."
+
+msgid "Show the mail"
+msgstr "Afficher le mail"
+
+msgid "Run"
+msgstr "Lancer"
+
+msgid "Delete this sample mail?"
+msgstr "Supprimer ce mail type ?"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Notification mail"
+msgstr "Mail de notification"
+
+msgid "New sample mail (JSON or raw email)"
+msgstr "Nouveau mail type (JSON ou e-mail brut)"
+
+msgid "Save the capability first to attach sample mails."
+msgstr "Enregistrez d'abord la capacité pour attacher des mails types."
+
+msgid "Save the sample mail"
+msgstr "Enregistrer le mail type"
+
+msgid "The result appears here."
+msgstr "Le résultat apparaît ici."

@@ -152,3 +152,21 @@ class CapabilityExecution(models.Model):
 
     def __str__(self):
         return f"{self.capability} — {self.status} — {self.created_at}"
+
+
+class CapabilitySampleMail(models.Model):
+    capability = models.ForeignKey(
+        Capability, on_delete=models.CASCADE, related_name="sample_mails"
+    )
+    label = models.CharField(_("Label"), max_length=64, blank=True)
+    content = models.TextField(_("Content"), blank=True)
+    position = models.PositiveIntegerField(_("Position"), default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("sample mail")
+        verbose_name_plural = _("sample mails")
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return f"{self.capability} — {self.label or self.pk}"
