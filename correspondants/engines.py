@@ -9,6 +9,7 @@ import time
 
 from django.db import transaction
 
+from .mail_parsing import RequiredExtractionError
 from .models import CapabilityExecution
 from .schemas import SchemaValidationError, validate
 
@@ -17,7 +18,7 @@ class CapabilityError(Exception):
     """Infrastructure failure (network, timeout, unparseable input)."""
 
 
-def run_parse_mail(capabilities, raw_email):
+def run_parse_mail(capabilities, mail_input):
     """Try each enabled parse-mail capability in priority order.
 
     First matching template wins; returns the parse-mail output document.
@@ -25,12 +26,12 @@ def run_parse_mail(capabilities, raw_email):
     from .mail_parsing import (
         UnparseableEmailError,
         matches_template,
-        parse_raw_email,
+        parse_mail_input,
         run_extractions,
     )
 
     try:
-        parsed = parse_raw_email(raw_email)
+        parsed = parse_mail_input(mail_input)
     except UnparseableEmailError as exc:
         raise CapabilityError(str(exc)) from exc
 
@@ -62,7 +63,7 @@ def execute_capability(capability, payload):
                 capability_type=capability.capability_type,
                 enabled=True,
             ).order_by("priority", "name")
-            output = run_parse_mail(siblings, payload["raw_email"])
+            output = run_parse_mail(siblings, payload)
         elif capability.capability_type.slug == "read-page":
             output = run_read_page(capability, payload)
         else:
@@ -77,6 +78,10 @@ def execute_capability(capability, payload):
         status = "error"
         error = str(exc)
         raise
+    except RequiredExtractionError as exc:
+        status = "error"
+        error = str(exc)
+        raise CapabilityError(str(exc)) from exc
     finally:
         duration_ms = int((time.monotonic() - started) * 1000)
         with transaction.atomic():

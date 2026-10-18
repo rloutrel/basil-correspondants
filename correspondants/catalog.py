@@ -89,14 +89,42 @@ READ_PAGE_CONFIG_SCHEMA = {
 
 PARSE_MAIL_INPUT_SCHEMA = {
     "type": "object",
-    "required": ["raw_email"],
-    "properties": {
-        "raw_email": {
-            "type": "string",
-            "description": "Full raw email (RFC 822 / MIME), as received.",
-        }
-    },
+    "description": (
+        "Either a raw RFC 822 email (raw_email) or an already-parsed mail "
+        "(sender, object, body). 'object' is the mail subject, named as by "
+        "the upstream provider."
+    ),
+    "anyOf": [
+        {
+            "type": "object",
+            "required": ["raw_email"],
+            "properties": {
+                "raw_email": {
+                    "type": "string",
+                    "description": "Full raw email (RFC 822 / MIME), as received.",
+                }
+            },
+        },
+        {
+            "type": "object",
+            "required": ["sender", "object", "body"],
+            "properties": {
+                "sender": {"type": "string"},
+                "object": {
+                    "type": "string",
+                    "description": "Mail subject (upstream field name).",
+                },
+                "body": {"type": "string"},
+            },
+        },
+    ],
     "additionalProperties": False,
+    "properties": {
+        "raw_email": {"type": "string"},
+        "sender": {"type": "string"},
+        "object": {"type": "string"},
+        "body": {"type": "string"},
+    },
 }
 
 PARSE_MAIL_OUTPUT_SCHEMA = {
@@ -150,7 +178,7 @@ PARSE_MAIL_CONFIG_SCHEMA = {
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["key", "source", "pattern"],
+                "required": ["key", "source"],
                 "properties": {
                     "key": {
                         "type": "string",
@@ -158,20 +186,28 @@ PARSE_MAIL_CONFIG_SCHEMA = {
                             "Name of the extracted value in the output object."
                         ),
                     },
-                    "source": {"enum": ["sender", "subject", "body", "header"]},
+                    "source": {
+                        "enum": [
+                            "sender",
+                            "subject",
+                            "body",
+                            "header",
+                            "query_param",
+                        ],
+                    },
                     "pattern": {
                         "type": "string",
                         "description": (
-                            "Python regular expression; if it contains "
-                            "exactly one capture group, the group is used, "
-                            "otherwise the whole match is used."
+                            "Python regular expression (required unless source "
+                            "is 'query_param'); if it contains exactly one "
+                            "capture group, the group is used, otherwise the "
+                            "whole match is used."
                         ),
                     },
                     "header_name": {
                         "type": "string",
                         "description": (
-                            "Required when source is 'header', "
-                            "case-insensitive."
+                            "Required when source is 'header', case-insensitive."
                         ),
                     },
                     "match_index": {
@@ -179,11 +215,36 @@ PARSE_MAIL_CONFIG_SCHEMA = {
                         "minimum": 0,
                         "default": 0,
                         "description": (
-                            "Index of the regex match to use when the "
-                            "pattern matches several times."
+                            "Index of the regex match to use when the pattern "
+                            "matches several times."
                         ),
                     },
                     "strip": {"type": "boolean", "default": True},
+                    "required": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": (
+                            "If true, an empty extraction fails the execution "
+                            "(content contract violation) instead of "
+                            "returning an empty string."
+                        ),
+                    },
+                    "from_key": {
+                        "type": "string",
+                        "description": (
+                            "Required when source is 'query_param': key of a "
+                            "previously extracted value (a URL); rules run in "
+                            "array order, so the referenced rule must come "
+                            "first."
+                        ),
+                    },
+                    "param": {
+                        "type": "string",
+                        "description": (
+                            "Required when source is 'query_param': query "
+                            "parameter name to read from the URL."
+                        ),
+                    },
                 },
             },
         },
@@ -233,6 +294,51 @@ EXAMPLE_CONFIGS = {
             {"key": "client", "source": "body", "pattern": r"Client: (.+)"},
         ],
     },
+}
+
+FREELANCERMAP_POBOX_NOTIFICATION_CONFIG = {
+    "match": {
+        "sender": {
+            "type": "exact",
+            "value": "noreply@freelancermap.de",
+            "case_sensitive": False,
+        },
+        "body": {
+            "type": "contains",
+            "value": "utm_campaign=pobox_benachrichtigung",
+        },
+    },
+    "extractions": [
+        {
+            "key": "job_title",
+            "source": "subject",
+            "pattern": "^(.+)$",
+            "required": True,
+        },
+        {
+            "key": "portal_url",
+            "source": "body",
+            "pattern": (
+                r"https://www\.freelancermap\.de/posteingang\.html"
+                r"\?id=\d+&context=pobox&token=[A-Za-z0-9]+"
+            ),
+            "required": True,
+        },
+        {
+            "key": "message_id",
+            "source": "query_param",
+            "from_key": "portal_url",
+            "param": "id",
+            "required": True,
+        },
+        {
+            "key": "login_token",
+            "source": "query_param",
+            "from_key": "portal_url",
+            "param": "token",
+            "required": True,
+        },
+    ],
 }
 
 CATALOG_BY_SLUG = {entry["slug"]: entry for entry in CAPABILITY_CATALOG}

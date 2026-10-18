@@ -225,16 +225,27 @@ never an execution error.
 ```json
 {
   "type": "object",
-  "required": ["raw_email"],
-  "properties": {
-    "raw_email": {
-      "type": "string",
-      "description": "Full raw email (RFC 822 / MIME), as received."
-    }
-  },
+  "description": "Either a raw RFC 822 email (raw_email) or an already-parsed mail (sender, object, body). 'object' is the mail subject, named as by the upstream provider.",
+  "anyOf": [
+    { "type": "object", "required": ["raw_email"],
+      "properties": { "raw_email": { "type": "string", "description": "Full raw email (RFC 822 / MIME), as received." } } },
+    { "type": "object", "required": ["sender", "object", "body"],
+      "properties": {
+        "sender": { "type": "string" },
+        "object": { "type": "string", "description": "Mail subject (upstream field name)." },
+        "body": { "type": "string" }
+      } }
+  ],
   "additionalProperties": false
 }
 ```
+
+Extraction sources: `sender`, `subject` (alias `object`, the upstream
+field name), `body`, `header`, and `query_param` — reading a query
+parameter from a previously extracted URL (`from_key` + `param`; rules run
+in array order, so the referenced rule must come first). Rules may set
+`required: true`: an empty extraction then fails the execution (content
+contract violation) instead of returning an empty string.
 
 **Output schema**:
 
@@ -307,9 +318,7 @@ ordered by `priority`):
 }
 ```
 
-Semantics: matching and extraction are pure functions of
-`(raw_email, config)` — fully deterministic and unit-testable with sample
-emails stored as test fixtures, no network, no browser, no AI.
+
 
 ---
 
@@ -459,7 +468,63 @@ list and manipulable independently of the template body.
   consumers can distinguish "absent" from "template did not match".
 - `strip` (default true) trims whitespace around the captured value.
 
-### 5.5 Testability consequences
+### 5.5 Concrete template: `freelancermap-pobox-notification`
+
+A real parse-mail template, shipped as reference configuration (it is pure
+configuration data — nothing freelancermap-specific lives in code). It matches
+freelancermap postfach-notification mails (JSON-parsed by the upstream
+provider as `{sender, object, body}`; `object` is the provider's field name
+for the subject) and extracts the data needed to reach the message on the
+portal.
+
+**Match rules** (all must pass; the subject is never matched — it is variable
+and sometimes generic):
+
+- `sender`: exact `noreply@freelancermap.de`
+- `body`: contains `utm_campaign=pobox_benachrichtigung`
+
+**Extraction rules** (declarative, deterministic):
+
+- `job_title` (required): the subject, verbatim.
+- `portal_url` (required): first body URL matching the allowlist regex
+  `https://www\.freelancermap\.de/posteingang\.html\?id=\d+&context=pobox&token=[A-Za-z0-9]+`.
+  This is an allowlist pattern, not "extract all links": the body also
+  contains a malformed settings URL (`https://https://www.freelancermap.de/dashboard/einstellungen`)
+  which must never be extracted.
+- `message_id` (required): query param `id` of `portal_url`.
+- `login_token` (required): query param `token` of `portal_url` (24-hour,
+  single-use login token; never to be forwarded — the notification mail says
+  so itself).
+
+**Output contract** (per-instance contract, expressed by the config):
+
+```json
+{
+  "job_title": "(Senior) System Test Engineer (m/w/d) | ANÜ | Testautomatisierung Java / API Testing | Hybrid",
+  "portal_url": "https://www.freelancermap.de/posteingang.html?id=4995147&context=pobox&token=sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn",
+  "message_id": "4995147",
+  "login_token": "sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn"
+}
+```
+
+The exact configuration lives in `correspondants/catalog.py`
+(`FREELANCERMAP_POBOX_NOTIFICATION_CONFIG`); four sample mails are checked
+in as test fixtures (`correspondants/tests/fixtures/pobox/pobox_{1..4}.json`).
+
+**Design note — links between capabilities**: these notification mails do NOT
+contain the job description. The description lives behind `portal_url` on
+the site itself, so consuming it is the `read-page` capability's job, not
+parse-mail's. The template contract therefore expresses that parse-mail
+outputs are sometimes *inputs for other capabilities*: a `read-page`
+capability instance can declare `portal_url` (or a URL template
+parameterized by `message_id`) as its input, chaining the two capabilities.
+In the current REST API this chaining is done by the caller (orchestration,
+e.g. basil-concierge); the capacities listing exposes both capabilities so
+any consumer can discover the chain. A future evolution may declare the
+chaining itself in configuration (capability input referencing another
+capability's output key) — out of scope for this phase.
+
+### 5.6 Testability consequences
 
 - Matching + extraction is a single pure function, unit-testable against
   fixture `.eml` files (checked into the repo, anonymized).

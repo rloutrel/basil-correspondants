@@ -32,6 +32,18 @@ def _type_ok(expected, value):
 
 
 def _validate(schema, value, path, errors):
+    if "anyOf" in schema:
+        branch_errors = []
+        for branch in schema["anyOf"]:
+            candidate = list(errors)
+            errors.clear()
+            _validate(branch, value, path, errors)
+            if not errors:
+                return
+            branch_errors.extend(errors)
+            errors.clear()
+        errors.append(f"{path}: does not match any allowed form")
+        return
     if "enum" in schema and value not in schema["enum"]:
         errors.append(f"{path}: {value!r} is not one of {schema['enum']}")
         return

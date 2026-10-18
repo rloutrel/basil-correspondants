@@ -73,8 +73,14 @@ class SchemaValidatorTests(TestCase):
 
     def test_parse_mail_input_schema(self):
         validate(catalog.PARSE_MAIL_INPUT_SCHEMA, {"raw_email": "..."})
+        validate(
+            catalog.PARSE_MAIL_INPUT_SCHEMA,
+            {"sender": "a@b.de", "object": "Subject", "body": "Hello"},
+        )
         with self.assertRaises(SchemaValidationError):
             validate(catalog.PARSE_MAIL_INPUT_SCHEMA, {})
+        with self.assertRaises(SchemaValidationError):
+            validate(catalog.PARSE_MAIL_INPUT_SCHEMA, {"unexpected": 1})
 
     def test_catalog_entries_complete(self):
         slugs = {entry["slug"] for entry in catalog.CAPABILITY_CATALOG}
