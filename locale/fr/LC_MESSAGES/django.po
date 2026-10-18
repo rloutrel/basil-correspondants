@@ -1,0 +1,91 @@
+# Basil — correspondants component — French translations.
+# This file is distributed under the MIT license.
+msgid ""
+msgstr ""
+"Project-Id-Version: basil-correspondants\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "correspondant"
+msgstr "correspondant"
+
+msgid "correspondants"
+msgstr "correspondants"
+
+msgid "capability type"
+msgstr "type de capacité"
+
+msgid "capability types"
+msgstr "types de capacité"
+
+msgid "capability"
+msgstr "capacité"
+
+msgid "capabilities"
+msgstr "capacités"
+
+msgid "capability execution"
+msgstr "exécution de capacité"
+
+msgid "capability executions"
+msgstr "exécutions de capacité"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Display name"
+msgstr "Nom affiché"
+
+msgid "Base URL"
+msgstr "URL de base"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Input schema"
+msgstr "Schéma d'entrée"
+
+msgid "Output schema"
+msgstr "Schéma de sortie"
+
+msgid "Config schema"
+msgstr "Schéma de configuration"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Priority"
+msgstr "Priorité"
+
+msgid "Input"
+msgstr "Entrée"
+
+msgid "Output"
+msgstr "Sortie"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Success"
+msgstr "Succès"
+
+msgid "Duration (ms)"
+msgstr "Durée (ms)"
+
+msgid "Only lowercase letters, digits and hyphens are allowed."
+msgstr "Seules les minuscules, les chiffres et les tirets sont autorisés."

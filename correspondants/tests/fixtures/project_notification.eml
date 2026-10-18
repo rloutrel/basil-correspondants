@@ -1,0 +1,24 @@
+Return-Path: <notifications@freelancermap.example>
+Received: from mx.example.net
+Date: Mon, 5 Jan 2026 10:15:00 +0100
+From: "Freelancermap Projects" <notifications@freelancermap.example>
+To: basil@example.com
+Subject: =?utf-8?q?New_project_PRJ-2026-0142=3A_R=C3=A9f=C3=A9rentiel_E-commerce?=
+Message-ID: <abc123@freelancermap.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hello,
+
+A new project matches your profile.
+
+Project: Referentiel E-commerce
+Reference: PRJ-2026-0142
+Client: ACME Corporation
+Budget: 45 000 EUR
+Deadline: 2026-02-15
+
+Details: https://www.freelancermap.example/projects/PRJ-2026-0142
+
+Best regards,
+The freelancermap team

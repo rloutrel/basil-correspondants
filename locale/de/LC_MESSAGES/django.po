@@ -1,0 +1,92 @@
+# Basil — correspondants component — German translations.
+# This file is distributed under the MIT license.
+msgid ""
+msgstr ""
+"Project-Id-Version: basil-correspondants\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "correspondant"
+msgstr ""
+
+msgid "correspondants"
+msgstr ""
+
+msgid "capability type"
+msgstr ""
+
+msgid "capability types"
+msgstr ""
+
+msgid "capability"
+msgstr ""
+
+msgid "capabilities"
+msgstr ""
+
+msgid "capability execution"
+msgstr ""
+
+msgid "capability executions"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Display name"
+msgstr ""
+
+msgid "Base URL"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Notes"
+msgstr ""
+
+msgid "Slug"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Input schema"
+msgstr ""
+
+msgid "Output schema"
+msgstr ""
+
+msgid "Config schema"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Input"
+msgstr ""
+
+msgid "Output"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "Duration (ms)"
+msgstr ""
+
+msgid "Only lowercase letters, digits and hyphens are allowed."
+msgstr ""
+
