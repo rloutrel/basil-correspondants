@@ -12,8 +12,7 @@
       <div class="card-actions">
         <button type="button" class="btn small"
                 hx-get="{% url 'correspondants:capability_create' correspondant.name %}"
-                hx-target="#overlay-content"
-                @click="overlay = 'form'">
+                hx-target="#correspondant-list" hx-swap="innerHTML">
           {% trans "Add a capability" %}
         </button>
         <button type="button" class="btn small secondary"
@@ -29,51 +28,38 @@
           {% trans "Delete" %}
         </button>
       </div>
+
+      {% if draft_correspondant_name == correspondant.name and not draft_capability %}
+        <details class="accordion config-item new-draft" open>
+          <summary>
+            <span class="accordion-title">{% trans "New capability" %}</span>
+            <span class="accordion-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="accordion-body">
+            {% include "correspondants/partials/capability_accordion.html" with correspondant_name=correspondant.name %}
+          </div>
+        </details>
+      {% endif %}
+
       {% if correspondant.capabilities.all %}
-        <div class="table-wrapper">
-          <table class="capabilities">
-            <thead>
-              <tr>
-                <th>{% trans "Capability" %}</th>
-                <th>{% trans "Type" %}</th>
-                <th>{% trans "Priority" %}</th>
-                <th>{% trans "Status" %}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for capability in correspondant.capabilities.all %}
-                <tr>
-                  <td>{{ capability.name }}</td>
-                  <td><span class="badge">{{ capability.capability_type.slug }}</span></td>
-                  <td>{{ capability.priority }}</td>
-                  <td>
-                    {% if capability.enabled %}
-                      <span class="badge">{% trans "Enabled" %}</span>
-                    {% else %}
-                      <span class="badge neutral">{% trans "Disabled" %}</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    <button type="button" class="btn small secondary"
-                            hx-get="{% url 'correspondants:capability_edit' correspondant.name capability.name %}"
-                            hx-target="#overlay-content"
-                            @click="overlay = 'form'">
-                      {% trans "Edit" %}
-                    </button>
-                    <button type="button" class="btn small danger"
-                            hx-get="{% url 'correspondants:capability_delete' correspondant.name capability.name %}"
-                            hx-target="#overlay-content"
-                            @click="overlay = 'form'">
-                      {% trans "Delete" %}
-                    </button>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
+        {% for capability in correspondant.capabilities.all %}
+          <details class="accordion config-item" id="capability-{{ capability.pk }}"
+                   {% if draft_capability and draft_capability.pk == capability.pk %}open{% endif %}>
+            <summary>
+              <span class="accordion-title">{{ capability.name }}</span>
+              <span class="badge neutral">{{ capability.capability_type.slug }}</span>
+              <span class="summary-frequency" title="{% trans 'Priority' %}">{{ capability.priority }}</span>
+              <span class="badge {% if capability.enabled %}badge-on{% else %}neutral{% endif %}">
+                {% if capability.enabled %}{% trans "Enabled" %}{% else %}{% trans "Disabled" %}{% endif %}
+              </span>
+              <span class="accordion-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="accordion-body">
+              {% include "correspondants/partials/capability_accordion.html" with capability=capability correspondant_name=correspondant.name %}
+            </div>
+          </details>
+        {% endfor %}
+      {% elif not draft_correspondant_name == correspondant.name %}
         <p class="meta">{% trans "No capability configured." %}</p>
       {% endif %}
     </section>

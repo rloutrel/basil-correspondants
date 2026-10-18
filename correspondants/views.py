@@ -13,29 +13,21 @@ from .schemas import SchemaValidationError
 CLOSE_EVENT = "close-overlay"
 
 
-def _capability_form_context(request, form, correspondant=None, capability=None):
-    """Context shared by the capability form template (create and edit)."""
+def _accordion_context():
+    """Shared context for rendering capability accordions in the list."""
     from .catalog import EXAMPLE_CONFIGS
 
+    capability_types = list(CapabilityType.objects.all())
     example_configs = {
-        str(capability_type.pk): json.dumps(
-            EXAMPLE_CONFIGS[capability_type.slug], indent=2, ensure_ascii=False
+        str(ct.pk): json.dumps(
+            EXAMPLE_CONFIGS[ct.slug], indent=2, ensure_ascii=False
         )
-        for capability_type in CapabilityType.objects.all()
-        if capability_type.slug in EXAMPLE_CONFIGS
+        for ct in capability_types
+        if ct.slug in EXAMPLE_CONFIGS
     }
     return {
-        "correspondant": correspondant or (capability.correspondant if capability else None),
-        "form": form,
-        "correspondant_name": (
-            capability.correspondant.name if capability
-            else (correspondant.name if correspondant else None)
-        ),
-        "capability_name": capability.name if capability else None,
+        "capability_types": capability_types,
         "example_configs": example_configs,
-        "parse_mail_pk": str(
-            CapabilityType.objects.get(slug="parse-mail").pk
-        ),
     }
 
 
@@ -43,10 +35,12 @@ def correspondant_list(request):
     correspondants = Correspondant.objects.prefetch_related(
         "capabilities__capability_type"
     ).order_by("name")
+    context = {"correspondants": correspondants}
+    context.update(_accordion_context())
     return render(
         request,
         "correspondants/index.html",
-        {"correspondants": correspondants},
+        context,
     )
 
 
@@ -101,13 +95,10 @@ def capability_create(request, name):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-    else:
-        form = CapabilityForm(instance=capability)
-    return render(
-        request,
-        "correspondants/partials/capability_form.html",
-        _capability_form_context(request, form, correspondant=correspondant),
-    )
+        return _list_with_draft(
+            request, name, draft_data=request.POST, errors=_form_error_list(form)
+        )
+    return _list_with_draft(request, name)
 
 
 def capability_edit(request, name, capability_name):
@@ -119,13 +110,14 @@ def capability_edit(request, name, capability_name):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-    else:
-        form = CapabilityForm(instance=capability)
-    return render(
-        request,
-        "correspondants/partials/capability_form.html",
-        _capability_form_context(request, form, capability=capability),
-    )
+        return _list_with_draft(
+            request,
+            name,
+            capability=capability,
+            draft_data=request.POST,
+            errors=_form_error_list(form),
+        )
+    return _list_refresh(request)
 
 
 def capability_delete(request, name, capability_name):
@@ -252,14 +244,45 @@ def _normalize_json_quotes(text):
     )
 
 
+def _form_error_list(form):
+    errors = []
+    for field, errs in form.errors.items():
+        for err in errs:
+            errors.append(f"{field}: {err}" if field != "__all__" else str(err))
+    return errors
+
+
+def _list_with_draft(request, name, capability=None, draft_data=None, errors=None):
+    """Render the full list with one accordion open holding draft data."""
+    correspondants = Correspondant.objects.prefetch_related(
+        "capabilities__capability_type"
+    ).order_by("name")
+    context = {"correspondants": correspondants}
+    context.update(_accordion_context())
+    context["draft_correspondant_name"] = name
+    context["draft_capability"] = capability
+    context["draft_errors"] = errors or []
+    if draft_data is not None:
+        context["draft_values"] = {
+            key: draft_data.get(key, "")
+            for key in (
+                "name", "capability_type", "priority", "enabled",
+                "description", "config", "sample_mail_1", "sample_mail_2",
+            )
+        }
+    return render(request, "correspondants/partials/list.html", context)
+
+
 def _list_refresh(request):
     correspondants = Correspondant.objects.prefetch_related(
         "capabilities__capability_type"
     ).order_by("name")
+    context = {"correspondants": correspondants}
+    context.update(_accordion_context())
     response = render(
         request,
         "correspondants/partials/list.html",
-        {"correspondants": correspondants},
+        context,
     )
     response.headers["HX-Trigger"] = CLOSE_EVENT
     return response

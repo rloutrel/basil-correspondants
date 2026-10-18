@@ -176,29 +176,15 @@ class CapabilityCrudTests(TestCase):
         self.assertContains(response, "Bad Name!")
         self.assertFalse(Capability.objects.exists())
 
-    def test_capability_form_shows_json_example(self):
+    def test_create_form_renders_example(self):
         response = self.client.get(
             reverse("correspondants:capability_create", args=["freelancermap"])
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Example configuration")
+        self.assertContains(response, "New capability")
         self.assertContains(response, "url_template")
-        self.assertContains(response, "selectors")
-        self.assertContains(response, "match")
         self.assertContains(response, "extractions")
-        self.assertContains(response, 'x-model="type"')
-        read_page_pk = str(CapabilityType.objects.get(slug="read-page").pk)
-        parse_mail_pk = str(CapabilityType.objects.get(slug="parse-mail").pk)
-        self.assertContains(response, f"type == '{read_page_pk}'")
-        self.assertContains(response, f"type == '{parse_mail_pk}'")
-        self.assertContains(response, "Select a capability type to see its example.")
-
-    def test_capability_form_example_follows_selected_type(self):
-        parse_mail_id = CapabilityType.objects.get(slug="parse-mail").pk
-        response = self.client.get(
-            reverse("correspondants:capability_create", args=["freelancermap"])
-        )
-        self.assertContains(response, 'value="%d"' % parse_mail_id)
+        self.assertContains(response, 'name="config"')
 
     def test_edit_capability(self):
         Capability.objects.create(
@@ -219,21 +205,19 @@ class CapabilityCrudTests(TestCase):
             Capability.objects.get(name="parse-project-mail").priority, 5
         )
 
-    def test_edit_form_renders_config_as_json(self):
+    def test_list_renders_capability_accordion_with_config(self):
         Capability.objects.create(
             correspondant=self.correspondant,
             capability_type=CapabilityType.objects.get(slug="parse-mail"),
             name="parse-project-mail",
             config=PARSE_MAIL_CONFIG,
         )
-        response = self.client.get(
-            reverse(
-                "correspondants:capability_edit",
-                args=["freelancermap", "parse-project-mail"],
-            )
-        )
+        response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "accordion")
+        self.assertContains(response, "parse-project-mail")
         self.assertContains(response, "PRJ-")
+        self.assertContains(response, 'name="sample_mail_1"')
 
     def test_delete_capability(self):
         Capability.objects.create(
@@ -366,13 +350,8 @@ class CapabilityPreviewTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
 
-    def test_capability_form_contains_live_test(self):
-        response = self.client.get(
-            reverse(
-                "correspondants:capability_edit",
-                args=["freelancermap", "freelancermap-pobox-notification"],
-            )
-        )
+    def test_list_accordion_contains_live_test(self):
+        response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Live test")
         self.assertContains(response, 'name="sample_mail_1"')

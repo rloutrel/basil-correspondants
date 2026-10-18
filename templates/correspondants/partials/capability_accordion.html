@@ -1,0 +1,100 @@
+{% load i18n json_tags %}
+<form class="inline-edit-form"
+      {% if capability %}
+        hx-post="{% url 'correspondants:capability_edit' correspondant_name capability.name %}"
+      {% else %}
+        hx-post="{% url 'correspondants:capability_create' correspondant_name %}"
+      {% endif %}
+      hx-target="#correspondant-list" hx-swap="innerHTML">
+  {% csrf_token %}
+  {% if draft_errors %}
+    <div class="error-message">
+      {% for error in draft_errors %}{{ error }}{% if not forloop.last %}; {% endif %}{% endfor %}
+    </div>
+  {% endif %}
+  <div class="inline-fields">
+    <label class="inline-field span-6">
+      <span class="inline-label">{% trans "Name" %}</span>
+      <input type="text" name="name" maxlength="64" required
+             value="{% if draft_values %}{{ draft_values.name }}{% else %}{{ capability.name|default:'' }}{% endif %}"
+             placeholder="freelancermap-pobox-notification">
+    </label>
+    <label class="inline-field span-3">
+      <span class="inline-label">{% trans "Capability type" %}</span>
+      <select name="capability_type" required>
+        {% for ct in capability_types %}
+          <option value="{{ ct.pk }}"
+                  {% if draft_values and draft_values.capability_type == ct.pk|stringformat:"s" %}selected{% elif capability and capability.capability_type_id == ct.pk %}selected{% endif %}>{{ ct.slug }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="inline-field span-3">
+      <span class="inline-label">{% trans "Priority" %}</span>
+      <input type="number" name="priority" required
+             value="{% if draft_values %}{{ draft_values.priority }}{% else %}{{ capability.priority|default:0 }}{% endif %}">
+    </label>
+    <label class="inline-field switch-field span-6">
+      <span class="inline-label">{% trans "Enabled" %}</span>
+      <input type="checkbox" name="enabled"
+             {% if draft_values %}{% if draft_values.enabled %}checked{% endif %}{% elif not capability or capability.enabled %}checked{% endif %}>
+    </label>
+    <label class="inline-field span-12">
+      <span class="inline-label">{% trans "Description" %}</span>
+      <input type="text" name="description"
+             value="{% if draft_values %}{{ draft_values.description }}{% else %}{{ capability.description|default:'' }}{% endif %}">
+    </label>
+    <label class="inline-field span-12">
+      <span class="inline-label">{% trans "Configuration (JSON)" %}</span>
+      <textarea name="config" rows="8"
+                hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                hx-trigger="change delay:500ms"
+                hx-include="closest form"
+                hx-target="closest .accordion-body .preview-results">{% if draft_values %}{{ draft_values.config }}{% else %}{{ capability.config|to_json }}{% endif %}</textarea>
+    </label>
+  </div>
+
+  <details class="json-example">
+    <summary>{% trans "Example configuration" %}</summary>
+    {% for type_pk, example in example_configs.items %}
+      <pre>{{ example }}</pre>
+    {% endfor %}
+  </details>
+
+  <div class="preview-section">
+    <h3>{% trans "Live test" %}</h3>
+    <p class="muted">{% trans "Enter one or two sample mails; the result updates as you edit." %}</p>
+    <div class="inline-fields">
+      <label class="inline-field span-6">
+        <span class="inline-label">{% trans "Sample mail 1 (JSON or raw email)" %}</span>
+        <textarea name="sample_mail_1" rows="5"
+                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                  hx-trigger="change delay:500ms"
+                  hx-include="closest form"
+                  hx-target="closest .accordion-body .preview-results">{% if draft_values %}{{ draft_values.sample_mail_1 }}{% endif %}</textarea>
+      </label>
+      <label class="inline-field span-6">
+        <span class="inline-label">{% trans "Sample mail 2 (JSON or raw email)" %}</span>
+        <textarea name="sample_mail_2" rows="5"
+                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                  hx-trigger="change delay:500ms"
+                  hx-include="closest form"
+                  hx-target="closest .accordion-body .preview-results">{% if draft_values %}{{ draft_values.sample_mail_2 }}{% endif %}</textarea>
+      </label>
+    </div>
+    <div class="preview-results">
+      <p class="muted">{% trans "The result appears here as you type." %}</p>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <button type="submit" class="btn small">{% trans "Save" %}</button>
+    {% if capability %}
+      <button type="button" class="btn small danger"
+              hx-post="{% url 'correspondants:capability_delete' correspondant_name capability.name %}"
+              hx-confirm="{% trans 'Delete this capability?' %}"
+              hx-target="#correspondant-list" hx-swap="innerHTML">
+        {% trans "Delete" %}
+      </button>
+    {% endif %}
+  </div>
+</form>
