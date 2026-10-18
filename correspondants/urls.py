@@ -1,10 +1,11 @@
 from django.urls import path
 
-from . import api
+from . import api, views
 
 app_name = "correspondants"
 
 urlpatterns = [
+    path("", views.correspondant_list, name="correspondant_list"),
     path(
         "correspondants/<str:name>/capacities",
         api.capacities,

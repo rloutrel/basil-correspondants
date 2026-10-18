@@ -89,3 +89,15 @@ msgstr "Durée (ms)"
 
 msgid "Only lowercase letters, digits and hyphens are allowed."
 msgstr "Seules les minuscules, les chiffres et les tirets sont autorisés."
+
+msgid "Correspondants"
+msgstr "Correspondants"
+
+msgid "Toggle dark mode"
+msgstr "Basculer le mode sombre"
+
+msgid "No capability configured."
+msgstr "Aucune capacité configurée."
+
+msgid "No correspondant configured yet."
+msgstr "Aucun correspondant configuré pour l'instant."

@@ -90,3 +90,15 @@ msgstr ""
 msgid "Only lowercase letters, digits and hyphens are allowed."
 msgstr ""
 
+msgid "Correspondants"
+msgstr ""
+
+msgid "Toggle dark mode"
+msgstr ""
+
+msgid "No capability configured."
+msgstr ""
+
+msgid "No correspondant configured yet."
+msgstr ""
+

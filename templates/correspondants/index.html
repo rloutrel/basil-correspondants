@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Basil — {% trans "Correspondants" %}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Correspondants" %}</h1>
+
+{% if correspondants %}
+  {% for correspondant in correspondants %}
+    <section class="card">
+      <h2>{{ correspondant.display_name|default:correspondant.name }}</h2>
+      <p class="muted">
+        <a href="{{ correspondant.base_url }}">{{ correspondant.base_url }}</a>
+      </p>
+      {% if correspondant.capabilities.all %}
+        <p>
+          {% for capability in correspondant.capabilities.all %}
+            <span class="badge">{{ capability.name }} · {{ capability.capability_type.slug }}</span>
+          {% endfor %}
+        </p>
+      {% else %}
+        <p class="muted">{% trans "No capability configured." %}</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+{% else %}
+  <p class="muted">{% trans "No correspondant configured yet." %}</p>
+{% endif %}
+{% endblock %}
