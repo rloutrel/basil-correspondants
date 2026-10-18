@@ -4,27 +4,30 @@
 {% block title %}Basil — {% trans "Correspondants" %}{% endblock %}
 
 {% block content %}
-<h1>{% trans "Correspondants" %}</h1>
+<div x-data="{ overlay: null }"
+     @close-overlay.window="overlay = null">
+  <h1>{% trans "Correspondants" %}</h1>
+  <p class="muted">
+    {% trans "External sites the house corresponds with, each with its capabilities." %}
+  </p>
 
-{% if correspondants %}
-  {% for correspondant in correspondants %}
-    <section class="card">
-      <h2>{{ correspondant.display_name|default:correspondant.name }}</h2>
-      <p class="muted">
-        <a href="{{ correspondant.base_url }}">{{ correspondant.base_url }}</a>
-      </p>
-      {% if correspondant.capabilities.all %}
-        <p>
-          {% for capability in correspondant.capabilities.all %}
-            <span class="badge">{{ capability.name }} · {{ capability.capability_type.slug }}</span>
-          {% endfor %}
-        </p>
-      {% else %}
-        <p class="muted">{% trans "No capability configured." %}</p>
-      {% endif %}
-    </section>
-  {% endfor %}
-{% else %}
-  <p class="muted">{% trans "No correspondant configured yet." %}</p>
-{% endif %}
+  <p>
+    <button type="button"
+            hx-get="{% url 'correspondants:correspondant_create' %}"
+            hx-target="#overlay-content"
+            @click="overlay = 'form'">
+      {% trans "Add a correspondant" %}
+    </button>
+  </p>
+
+  <div id="correspondant-list">
+    {% include "correspondants/partials/list.html" %}
+  </div>
+
+  <div class="overlay-backdrop" x-show="overlay !== null" x-cloak
+       @click.self="overlay = null"
+       @keydown.escape.window="overlay = null">
+    <div class="overlay" id="overlay-content"></div>
+  </div>
+</div>
 {% endblock %}

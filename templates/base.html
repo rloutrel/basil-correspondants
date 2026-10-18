@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Basil — {% trans "Correspondants" %}{% endblock %}</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
   <style>
     :root {
       --bg: #f5f6f8;
@@ -14,6 +16,8 @@
       --accent: #2f6f4f;
       --accent-contrast: #ffffff;
       --badge-bg: #e8ecef;
+      --danger: #b21f4f;
+      --danger-soft: #f280a8;
     }
     html[data-theme="dark"] {
       --bg: #14171b;
@@ -24,14 +28,18 @@
       --accent: #6fbf8f;
       --accent-contrast: #14171b;
       --badge-bg: #262c33;
+      --danger: #f280a8;
+      --danger-soft: #7a1f1f;
     }
     @media (prefers-color-scheme: dark) {
       html[data-theme="auto"] {
         --bg: #14171b; --surface: #1d2126; --text: #e6e9ed;
         --muted: #a8b3bf; --border: #333a42; --accent: #6fbf8f;
         --accent-contrast: #14171b; --badge-bg: #262c33;
+        --danger: #f280a8; --danger-soft: #7a1f1f;
       }
     }
+    [x-cloak] { display: none !important; }
     body {
       margin: 0;
       background: var(--bg);
@@ -67,6 +75,18 @@
       font-size: 0.85rem;
       margin-right: 0.3rem;
     }
+    .badge-on { color: var(--accent); }
+    .badge-off { color: var(--muted); }
+    button {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border: none;
+      border-radius: 6px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button.danger { background: var(--danger); color: #fff; }
     button.theme-toggle {
       background: var(--surface);
       color: var(--text);
@@ -74,6 +94,53 @@
       border-radius: 6px;
       padding: 0.25rem 0.6rem;
       cursor: pointer;
+    }
+    .card-actions { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+    table.capabilities { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    table.capabilities th, table.capabilities td {
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    table.capabilities td:last-child { text-align: right; }
+    .alert {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      margin: 0.8rem 0;
+    }
+    .alert-error { border-color: var(--danger); }
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1rem;
+      z-index: 10;
+    }
+    .overlay {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      width: 100%;
+      max-width: 40rem;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    form p { margin: 0.5rem 0; }
+    form label { display: block; font-size: 0.9rem; margin-bottom: 0.15rem; }
+    input, select, textarea {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.5rem;
+      box-sizing: border-box;
     }
     a { color: var(--accent); }
   </style>

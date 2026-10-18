@@ -1,4 +1,7 @@
+import json
+
 from django.test import TestCase
+from django.urls import reverse
 
 from correspondants.models import Capability, CapabilityType, Correspondant
 
@@ -40,3 +43,170 @@ class IndexViewTests(TestCase):
         self.assertEqual(settings.LOGIN_REDIRECT_URL, "correspondants:correspondant_list")
         match = resolve(reverse(settings.LOGIN_REDIRECT_URL))
         self.assertEqual(match.view_name, "correspondants:correspondant_list")
+
+
+class CorrespondantCrudTests(TestCase):
+    def test_create_correspondant(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "freelancermap",
+                "display_name": "Freelancermap",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+                "notes": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            Correspondant.objects.filter(name="freelancermap").exists()
+        )
+        self.assertContains(response, "freelancermap")
+        self.assertEqual(response.headers["HX-Trigger"], "close-overlay")
+
+    def test_create_correspondant_invalid_name(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "Invalid Name!",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Correspondant.objects.exists())
+
+    def test_edit_correspondant(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            {
+                "name": "freelancermap",
+                "display_name": "Freelancermap",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+                "notes": "updated note",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Correspondant.objects.get(name="freelancermap").notes, "updated note"
+        )
+
+    def test_delete_correspondant(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.post(
+            reverse("correspondants:correspondant_delete", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Correspondant.objects.exists())
+
+    def test_edit_form_renders(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.get(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "freelancermap")
+
+
+class CapabilityCrudTests(TestCase):
+    def setUp(self):
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+
+    def capability_post_data(self, **overrides):
+        data = {
+            "name": "parse-project-mail",
+            "capability_type": str(CapabilityType.objects.get(slug="parse-mail").pk),
+            "config": json.dumps(PARSE_MAIL_CONFIG),
+            "enabled": "on",
+            "priority": "0",
+            "description": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_create_capability(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(),
+        )
+        self.assertEqual(response.status_code, 200)
+        capability = Capability.objects.get(name="parse-project-mail")
+        self.assertEqual(capability.config, PARSE_MAIL_CONFIG)
+        self.assertEqual(response.headers["HX-Trigger"], "close-overlay")
+
+    def test_create_capability_invalid_json(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(config="{not json"),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Capability.objects.exists())
+
+    def test_create_capability_schema_invalid_config(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(config=json.dumps({"match": {}})),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Capability.objects.exists())
+
+    def test_edit_capability(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_edit",
+                args=["freelancermap", "parse-project-mail"],
+            ),
+            self.capability_post_data(priority="5"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Capability.objects.get(name="parse-project-mail").priority, 5
+        )
+
+    def test_edit_form_renders_config_as_json(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.get(
+            reverse(
+                "correspondants:capability_edit",
+                args=["freelancermap", "parse-project-mail"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PRJ-")
+
+    def test_delete_capability(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_delete",
+                args=["freelancermap", "parse-project-mail"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Capability.objects.exists())

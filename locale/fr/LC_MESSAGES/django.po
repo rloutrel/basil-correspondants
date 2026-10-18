@@ -101,3 +101,54 @@ msgstr "Aucune capacité configurée."
 
 msgid "No correspondant configured yet."
 msgstr "Aucun correspondant configuré pour l'instant."
+
+msgid "External sites the house corresponds with, each with its capabilities."
+msgstr "Les sites externes avec lesquels la maison correspond, chacun avec ses capacités."
+
+msgid "Add a correspondant"
+msgstr "Ajouter un correspondant"
+
+msgid "Add a capability"
+msgstr "Ajouter une capacité"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Disabled"
+msgstr "Désactivé"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Capability"
+msgstr "Capacité"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Priority"
+msgstr "Priorité"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Configuration (JSON)"
+msgstr "Configuration (JSON)"
+
+msgid "Could not save"
+msgstr "Impossible d'enregistrer"
+
+msgid "Delete correspondant %(name)s and all its capabilities?"
+msgstr "Supprimer le correspondant %(name)s et toutes ses capacités ?"
+
+msgid "Delete capability %(name)s?"
+msgstr "Supprimer la capacité %(name)s ?"

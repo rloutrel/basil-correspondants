@@ -1,0 +1,14 @@
+{% load i18n %}
+<form {% if capability_name %}
+        method="post" action="{% url 'correspondants:capability_edit' correspondant_name capability_name %}"
+        hx-post="{% url 'correspondants:capability_edit' correspondant_name capability_name %}"
+      {% else %}
+        method="post" action="{% url 'correspondants:capability_create' correspondant_name %}"
+        hx-post="{% url 'correspondants:capability_create' correspondant_name %}"
+      {% endif %}
+      hx-target="#correspondant-list" hx-swap="innerHTML">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">{% trans "Save" %}</button>
+  <button type="button" @click="overlay = null">{% trans "Cancel" %}</button>
+</form>

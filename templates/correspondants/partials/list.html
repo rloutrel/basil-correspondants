@@ -1,0 +1,81 @@
+{% load i18n %}
+<div>
+  {% for correspondant in correspondants %}
+    <section class="card">
+      <h2>{{ correspondant.display_name|default:correspondant.name }}</h2>
+      <p class="muted">
+        <a href="{{ correspondant.base_url }}" rel="noopener">{{ correspondant.base_url }}</a>
+        {% if not correspondant.enabled %}
+          <span class="badge badge-off">{% trans "Disabled" %}</span>
+        {% endif %}
+      </p>
+      <div class="card-actions">
+        <button type="button"
+                hx-get="{% url 'correspondants:capability_create' correspondant.name %}"
+                hx-target="#overlay-content"
+                @click="overlay = 'form'">
+          {% trans "Add a capability" %}
+        </button>
+        <button type="button"
+                hx-get="{% url 'correspondants:correspondant_edit' correspondant.name %}"
+                hx-target="#overlay-content"
+                @click="overlay = 'form'">
+          {% trans "Edit" %}
+        </button>
+        <button type="button" class="danger"
+                hx-get="{% url 'correspondants:correspondant_delete' correspondant.name %}"
+                hx-target="#overlay-content"
+                @click="overlay = 'form'">
+          {% trans "Delete" %}
+        </button>
+      </div>
+      {% if correspondant.capabilities.all %}
+        <table class="capabilities">
+          <thead>
+            <tr>
+              <th>{% trans "Capability" %}</th>
+              <th>{% trans "Type" %}</th>
+              <th>{% trans "Priority" %}</th>
+              <th>{% trans "Status" %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for capability in correspondant.capabilities.all %}
+              <tr>
+                <td>{{ capability.name }}</td>
+                <td><span class="badge">{{ capability.capability_type.slug }}</span></td>
+                <td>{{ capability.priority }}</td>
+                <td>
+                  {% if capability.enabled %}
+                    <span class="badge badge-on">{% trans "Enabled" %}</span>
+                  {% else %}
+                    <span class="badge badge-off">{% trans "Disabled" %}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <button type="button"
+                          hx-get="{% url 'correspondants:capability_edit' correspondant.name capability.name %}"
+                          hx-target="#overlay-content"
+                          @click="overlay = 'form'">
+                    {% trans "Edit" %}
+                  </button>
+                  <button type="button" class="danger"
+                          hx-get="{% url 'correspondants:capability_delete' correspondant.name capability.name %}"
+                          hx-target="#overlay-content"
+                          @click="overlay = 'form'">
+                    {% trans "Delete" %}
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">{% trans "No capability configured." %}</p>
+      {% endif %}
+    </section>
+  {% empty %}
+    <p class="muted">{% trans "No correspondant configured yet." %}</p>
+  {% endfor %}
+</div>

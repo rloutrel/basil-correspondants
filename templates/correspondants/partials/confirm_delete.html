@@ -1,0 +1,20 @@
+{% load i18n %}
+<form {% if capability %}
+        method="post" action="{% url 'correspondants:capability_delete' correspondant_name name %}"
+        hx-post="{% url 'correspondants:capability_delete' correspondant_name name %}"
+      {% else %}
+        method="post" action="{% url 'correspondants:correspondant_delete' name %}"
+        hx-post="{% url 'correspondants:correspondant_delete' name %}"
+      {% endif %}
+      hx-target="#correspondant-list" hx-swap="innerHTML">
+  {% csrf_token %}
+  <p>
+    {% if capability %}
+      {% blocktrans %}Delete capability {{ name }}?{% endblocktrans %}
+    {% else %}
+      {% blocktrans %}Delete correspondant {{ name }} and all its capabilities?{% endblocktrans %}
+    {% endif %}
+  </p>
+  <button type="submit" class="danger">{% trans "Delete" %}</button>
+  <button type="button" @click="overlay = null">{% trans "Cancel" %}</button>
+</form>

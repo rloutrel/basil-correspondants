@@ -102,3 +102,54 @@ msgstr ""
 msgid "No correspondant configured yet."
 msgstr ""
 
+msgid "External sites the house corresponds with, each with its capabilities."
+msgstr ""
+
+msgid "Add a correspondant"
+msgstr ""
+
+msgid "Add a capability"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Capability"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Configuration (JSON)"
+msgstr ""
+
+msgid "Could not save"
+msgstr ""
+
+msgid "Delete correspondant %(name)s and all its capabilities?"
+msgstr ""
+
+msgid "Delete capability %(name)s?"
+msgstr ""
+
