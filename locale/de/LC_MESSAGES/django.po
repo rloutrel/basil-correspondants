@@ -167,3 +167,8 @@ msgstr ""
 
 msgid "Example configuration"
 msgstr ""
+msgid "Select a capability type to see its example."
+msgstr ""
+
+msgid "No example available."
+msgstr ""

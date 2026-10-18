@@ -13,8 +13,11 @@ def _capability_form_context(request, form, correspondant=None, capability=None)
     from .catalog import EXAMPLE_CONFIGS
 
     example_configs = {
-        slug: json.dumps(example, indent=2, ensure_ascii=False)
-        for slug, example in EXAMPLE_CONFIGS.items()
+        str(capability_type.pk): json.dumps(
+            EXAMPLE_CONFIGS[capability_type.slug], indent=2, ensure_ascii=False
+        )
+        for capability_type in CapabilityType.objects.all()
+        if capability_type.slug in EXAMPLE_CONFIGS
     }
     return {
         "correspondant": correspondant or (capability.correspondant if capability else None),

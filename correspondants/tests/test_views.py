@@ -186,6 +186,11 @@ class CapabilityCrudTests(TestCase):
         self.assertContains(response, "match")
         self.assertContains(response, "extractions")
         self.assertContains(response, 'x-model="type"')
+        read_page_pk = str(CapabilityType.objects.get(slug="read-page").pk)
+        parse_mail_pk = str(CapabilityType.objects.get(slug="parse-mail").pk)
+        self.assertContains(response, f"type == '{read_page_pk}'")
+        self.assertContains(response, f"type == '{parse_mail_pk}'")
+        self.assertContains(response, "Select a capability type to see its example.")
 
     def test_capability_form_example_follows_selected_type(self):
         parse_mail_id = CapabilityType.objects.get(slug="parse-mail").pk

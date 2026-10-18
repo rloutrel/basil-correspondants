@@ -36,9 +36,14 @@
 
   <details class="json-example">
     <summary>{% trans "Example configuration" %}</summary>
-    <pre x-text="({% for slug, example in example_configs.items %}
-      {% if forloop.first %}'{{ slug }}': `{{ example }}`{% else %},'{{ slug }}': `{{ example }}`{% endif %}
-    {% endfor %})[type] || ''"></pre>
+    {% if example_configs %}
+      {% for type_pk, example in example_configs.items %}
+        <pre x-show="type == '{{ type_pk }}'">{{ example }}</pre>
+      {% endfor %}
+      <p class="json-example-hint" x-show="!type">{% trans "Select a capability type to see its example." %}</p>
+    {% else %}
+      <p class="json-example-hint">{% trans "No example available." %}</p>
+    {% endif %}
   </details>
 
   <label for="{{ form.priority.id_for_label }}">{{ form.priority.label }}</label>

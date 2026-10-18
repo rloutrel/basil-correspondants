@@ -173,3 +173,8 @@ table.capabilities .btn { margin-left: 0.3rem; }
   word-break: break-word;
   margin: 0.4rem 0 0;
 }
+.json-example-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0.4rem 0 0;
+}

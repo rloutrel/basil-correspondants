@@ -170,3 +170,9 @@ msgstr "Confirmer la suppression"
 
 msgid "Example configuration"
 msgstr "Exemple de configuration"
+
+msgid "Select a capability type to see its example."
+msgstr "Sélectionnez un type de capacité pour voir son exemple."
+
+msgid "No example available."
+msgstr "Aucun exemple disponible."
