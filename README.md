@@ -149,8 +149,29 @@ docker compose exec web python manage.py test
 ## Languages
 
 The interface is internationalised and ships English, German and French
-catalogs (`django.po` files under `locale/`). UI labels are rendered in
-French via i18n; `LANGUAGE_CODE = "en-gb"`.
+catalogs (`django.po` files under `locale/`). The language is chosen by these
+standards, in order:
+
+1. the user's explicit choice via the language selector in the navbar (stored
+   in the Django session cookie and mirrored in `localStorage` under
+   `basil-language`),
+2. otherwise the browser's `Accept-Language` header (standard HTTP content
+   negotiation, as implemented by Django's `LocaleMiddleware`),
+3. otherwise the default (`LANGUAGE_CODE = "en-gb"`).
+
+To maintain translations, update the `.po` files and run:
+
+```bash
+python manage.py compilemessages       # non-Docker
+docker compose exec web python manage.py compilemessages  # Docker
+```
+
+## Theming
+
+The UI shares the Basil design system with [basil-mail](https://github.com/rloutrel/basil-mail):
+same CSS custom properties, dark and light themes toggled from the navbar,
+persisted in `localStorage` (`basil-theme`), defaulting to the operating-system
+preference (`prefers-color-scheme`).
 
 ## Roadmap
 

@@ -210,3 +210,30 @@ class CapabilityCrudTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Capability.objects.exists())
+
+
+class LanguageSwitchTests(TestCase):
+    def test_index_contains_language_form(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="lang-form"')
+        self.assertContains(response, 'id="lang-select"')
+        for code, flag in (("de", "🇩🇪"), ("fr", "🇫🇷"), ("en", "🇬🇧")):
+            self.assertContains(response, f'value="{code}"')
+
+    def test_set_language_switches_to_french(self):
+        from django.conf import settings
+
+        response = self.client.post(
+            "/i18n/setlang/", {"language": "fr", "next": "/"}
+        )
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get("/")
+        self.assertContains(response, "Ajouter un correspondant")
+
+    def test_base_uses_shared_ui_charte(self):
+        response = self.client.get("/")
+        self.assertContains(response, "css/base.css")
+        self.assertContains(response, "basil-language")
+        self.assertContains(response, "htmx.org")
+        self.assertContains(response, "alpinejs")

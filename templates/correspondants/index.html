@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Basil — {% trans "Correspondants" %}{% endblock %}
+{% block title %}{% trans "Correspondants" %} — Basil{% endblock %}
 
 {% block content %}
 <div x-data="{ overlay: null }"
@@ -12,7 +12,7 @@
   </p>
 
   <p>
-    <button type="button"
+    <button type="button" class="btn"
             hx-get="{% url 'correspondants:correspondant_create' %}"
             hx-target="#overlay-content"
             @click="overlay = 'form'">
@@ -24,10 +24,10 @@
     {% include "correspondants/partials/list.html" %}
   </div>
 
-  <div class="overlay-backdrop" x-show="overlay !== null" x-cloak
+  <div class="modal-backdrop" x-show="overlay !== null" x-cloak
        @click.self="overlay = null"
        @keydown.escape.window="overlay = null">
-    <div class="overlay" id="overlay-content"></div>
+    <div class="modal" id="overlay-content"></div>
   </div>
 </div>
 {% endblock %}

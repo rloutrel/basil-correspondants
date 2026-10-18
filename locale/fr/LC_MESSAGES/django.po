@@ -152,3 +152,18 @@ msgstr "Supprimer le correspondant %(name)s et toutes ses capacités ?"
 
 msgid "Delete capability %(name)s?"
 msgstr "Supprimer la capacité %(name)s ?"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Edit correspondant"
+msgstr "Modifier le correspondant"
+
+msgid "Edit capability"
+msgstr "Modifier la capacité"
+
+msgid "Add a capability"
+msgstr "Ajouter une capacité"
+
+msgid "Confirm deletion"
+msgstr "Confirmer la suppression"

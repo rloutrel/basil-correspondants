@@ -1,5 +1,6 @@
 {% load i18n %}
-<form {% if capability_name %}
+<form class="form-card"
+      {% if capability_name %}
         method="post" action="{% url 'correspondants:capability_edit' correspondant_name capability_name %}"
         hx-post="{% url 'correspondants:capability_edit' correspondant_name capability_name %}"
       {% else %}
@@ -8,7 +9,16 @@
       {% endif %}
       hx-target="#correspondant-list" hx-swap="innerHTML">
   {% csrf_token %}
+  <h2>
+    {% if capability_name %}
+      {% trans "Edit capability" %}
+    {% else %}
+      {% trans "Add a capability" %}
+    {% endif %}
+  </h2>
   {{ form.as_p }}
-  <button type="submit">{% trans "Save" %}</button>
-  <button type="button" @click="overlay = null">{% trans "Cancel" %}</button>
+  <div class="form-actions">
+    <button type="submit" class="btn">{% trans "Save" %}</button>
+    <button type="button" class="btn secondary" @click="overlay = null">{% trans "Cancel" %}</button>
+  </div>
 </form>
