@@ -8,6 +8,7 @@ permissively licensed third-party packages:
 | Django | BSD-3-Clause | Web framework, ORM, admin |
 | psycopg2-binary | LGPL-3.0 (runtime dependency only, not distributed) | PostgreSQL adapter — Django's documented PostgreSQL driver; see note below |
 | dj-database-url | BSD-2-Clause | DATABASE_URL parsing |
+| whitenoise | MIT | Static file serving (WSGI middleware) |
 
 Everything else is the Python standard library (`email`, `re`, `json`).
 Notably, JSON Schema validation is a hand-rolled subset validator

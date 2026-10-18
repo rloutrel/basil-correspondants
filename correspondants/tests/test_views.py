@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.test import TestCase
 from django.urls import reverse
@@ -233,7 +234,18 @@ class LanguageSwitchTests(TestCase):
 
     def test_base_uses_shared_ui_charte(self):
         response = self.client.get("/")
-        self.assertContains(response, "css/base.css")
+        self.assertContains(response, "/static/css/base.")
         self.assertContains(response, "basil-language")
         self.assertContains(response, "htmx.org")
         self.assertContains(response, "alpinejs")
+
+
+class StaticFilesTests(TestCase):
+    def test_base_css_served_with_css_mime_type(self):
+        from django.conf import settings
+
+        if not os.path.isdir(settings.STATIC_ROOT):
+            self.skipTest("collectstatic has not been run")
+        response = self.client.get("/static/css/base.css")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/css"))
