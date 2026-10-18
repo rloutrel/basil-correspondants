@@ -178,3 +178,14 @@ table.capabilities .btn { margin-left: 0.3rem; }
   font-size: 0.8rem;
   margin: 0.4rem 0 0;
 }
+.test-result {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0.4rem 0 0;
+}

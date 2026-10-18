@@ -33,6 +33,11 @@ urlpatterns = [
         name="capability_delete",
     ),
     path(
+        "correspondants/<str:name>/capabilities/<str:capability_name>/test",
+        views.capability_test,
+        name="capability_test",
+    ),
+    path(
         "api/correspondants/<str:name>/capacities",
         api.capacities,
         name="capacities",

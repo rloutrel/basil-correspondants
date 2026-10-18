@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import os
 
 from django.test import TestCase
@@ -287,3 +288,91 @@ class StaticFilesTests(TestCase):
         response = self.client.get("/static/css/base.css")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response["Content-Type"].startswith("text/css"))
+
+
+class CapabilityTestViewTests(TestCase):
+    def setUp(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.de"
+        )
+        self.capability = Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="freelancermap-pobox-notification",
+            config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
+        )
+        self.url = reverse(
+            "correspondants:capability_test",
+            args=["freelancermap", "freelancermap-pobox-notification"],
+        )
+
+    def test_list_shows_test_button_for_parse_mail(self):
+        response = self.client.get("/")
+        self.assertContains(response, "/capabilities/freelancermap-pobox-notification/test")
+
+    def test_test_view_renders_input_box(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="mail_input"')
+
+    def test_run_with_json_mail(self):
+        fixture = json.loads(
+            (Path(__file__).parent / "fixtures" / "pobox" / "pobox_1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        response = self.client.post(self.url, {"mail_input": json.dumps(fixture)})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "4995147")
+        self.assertContains(response, "sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn")
+        self.assertContains(response, "System Test Engineer")
+
+    def test_run_with_raw_email(self):
+        raw = (
+            "From: noreply@freelancermap.de\r\n"
+            "Subject: Some project\r\n"
+            "Content-Type: text/plain\r\n"
+            "\r\n"
+            "utm_campaign=pobox_benachrichtigung\r\n"
+            "https://www.freelancermap.de/posteingang.html"
+            "?id=4995147&context=pobox&token=sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn"
+        )
+        response = self.client.post(self.url, {"mail_input": raw})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "4995147")
+
+    def test_run_with_raw_email_missing_url_shows_required_error(self):
+        raw = (
+            "From: noreply@freelancermap.de\r\n"
+            "Subject: Some project\r\n"
+            "Content-Type: text/plain\r\n"
+            "\r\n"
+            "utm_campaign=pobox_benachrichtigung"
+        )
+        response = self.client.post(self.url, {"mail_input": raw})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "required extraction")
+
+    def test_run_with_empty_input_shows_error(self):
+        response = self.client.post(self.url, {"mail_input": ""})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Paste a mail to test.")
+
+    def test_run_with_invalid_json_shows_error(self):
+        response = self.client.post(self.url, {"mail_input": "{not json"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
+
+    def test_run_preserves_input_value(self):
+        fixture = json.loads(
+            (Path(__file__).parent / "fixtures" / "pobox" / "pobox_2.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        payload = json.dumps(fixture)
+        response = self.client.post(self.url, {"mail_input": payload})
+        self.assertContains(response, "4993600")

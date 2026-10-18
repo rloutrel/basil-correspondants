@@ -172,3 +172,29 @@ msgstr ""
 
 msgid "No example available."
 msgstr ""
+msgid "Test"
+msgstr ""
+
+msgid "Test capability"
+msgstr ""
+
+msgid "Mail to test (JSON or raw email)"
+msgstr ""
+
+msgid "Run the test"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Result"
+msgstr ""
+
+msgid "Paste a mail to test."
+msgstr ""
+
+msgid "Invalid JSON: %(error)s"
+msgstr ""
+
+msgid "The mail does not match the expected input format."
+msgstr ""

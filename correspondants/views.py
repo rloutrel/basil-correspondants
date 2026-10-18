@@ -1,9 +1,12 @@
 import json
 
 from django.shortcuts import get_object_or_404, render
+from django.utils.translation import gettext as _
 
+from .engines import CapabilityError, execute_capability
 from .forms import CapabilityForm, CorrespondantForm
 from .models import Capability, CapabilityType, Correspondant
+from .schemas import SchemaValidationError
 
 CLOSE_EVENT = "close-overlay"
 
@@ -132,6 +135,60 @@ def capability_delete(request, name, capability_name):
         "correspondants/partials/confirm_delete.html",
         {"name": capability_name, "capability": True, "correspondant_name": name},
     )
+
+
+def capability_test(request, name, capability_name):
+    """Interactive test of a parse-mail capability from the UI.
+
+    Renders an input box (paste a mail), runs the capability on submit and
+    shows the extraction result inline. Deterministic: same input, same
+    output; no external dependency.
+    """
+    capability = get_object_or_404(
+        Capability.objects.select_related("capability_type", "correspondant"),
+        correspondant__name=name,
+        name=capability_name,
+        enabled=True,
+    )
+    result = None
+    error = None
+    mail_input = ""
+    if request.method == "POST":
+        mail_input = request.POST.get("mail_input", "").strip()
+        payload, parse_error = _parse_mail_test_input(mail_input)
+        if parse_error:
+            error = parse_error
+        else:
+            try:
+                output = execute_capability(capability, payload)
+                result = json.dumps(output, indent=2, ensure_ascii=False)
+            except CapabilityError as exc:
+                error = str(exc)
+            except SchemaValidationError:
+                error = _("The mail does not match the expected input format.")
+    return render(
+        request,
+        "correspondants/partials/capability_test.html",
+        {
+            "correspondant_name": name,
+            "capability_name": capability_name,
+            "mail_input": mail_input,
+            "result": result,
+            "error": error,
+        },
+    )
+
+
+def _parse_mail_test_input(mail_input):
+    """Accept a JSON mail ({sender, object, body}) or a raw RFC 822 email."""
+    if not mail_input:
+        return None, _("Paste a mail to test.")
+    if mail_input.startswith("{"):
+        try:
+            return json.loads(mail_input), None
+        except json.JSONDecodeError as exc:
+            return None, _("Invalid JSON: %(error)s") % {"error": exc}
+    return {"raw_email": mail_input}, None
 
 
 def _list_refresh(request):

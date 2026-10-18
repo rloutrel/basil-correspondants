@@ -176,3 +176,30 @@ msgstr "Sélectionnez un type de capacité pour voir son exemple."
 
 msgid "No example available."
 msgstr "Aucun exemple disponible."
+
+msgid "Test"
+msgstr "Tester"
+
+msgid "Test capability"
+msgstr "Tester la capacité"
+
+msgid "Mail to test (JSON or raw email)"
+msgstr "Mail à tester (JSON ou e-mail brut)"
+
+msgid "Run the test"
+msgstr "Lancer le test"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Result"
+msgstr "Résultat"
+
+msgid "Paste a mail to test."
+msgstr "Collez un mail à tester."
+
+msgid "Invalid JSON: %(error)s"
+msgstr "JSON invalide : %(error)s"
+
+msgid "The mail does not match the expected input format."
+msgstr "Le mail ne correspond pas au format d'entrée attendu."
