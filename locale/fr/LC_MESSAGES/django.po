@@ -231,3 +231,10 @@ msgstr "Le résultat apparaît ici au fil de la saisie."
 
 msgid "Sample"
 msgstr "Mail type"
+
+msgid ""
+"Check that the quotes are straight double quotes and that the JSON is "
+"complete."
+msgstr ""
+"Vérifiez que les guillemets sont des doubles quotes droites et que le JSON "
+"est complet."

@@ -377,3 +377,16 @@ class CapabilityPreviewTests(TestCase):
         self.assertContains(response, "Live test")
         self.assertContains(response, 'name="sample_mail_1"')
         self.assertContains(response, 'name="sample_mail_2"')
+
+    def test_preview_accepts_typographic_quotes(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        curly_sample = self.sample.replace('"', "\u201c")
+        curly_config = json.dumps(
+            FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+        ).replace('"', "\u201c")
+        response = self.preview(curly_config, sample_1=curly_sample)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Invalid JSON")
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "4995147")

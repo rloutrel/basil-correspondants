@@ -161,7 +161,7 @@ def capability_preview(request, name, capability_name=None):
     errors = []
     config = None
     try:
-        config = json.loads(config_raw)
+        config = json.loads(_normalize_json_quotes(config_raw))
     except json.JSONDecodeError as exc:
         errors.append(_("Invalid JSON: %(error)s") % {"error": exc})
     if config is not None and capability_name:
@@ -228,11 +228,28 @@ def _parse_mail_test_input(mail_text):
     if not mail_text:
         return None, _("Paste a mail to test.")
     if mail_text.startswith("{"):
+        normalized = _normalize_json_quotes(mail_text)
         try:
-            return json.loads(mail_text), None
+            return json.loads(normalized), None
         except json.JSONDecodeError as exc:
-            return None, _("Invalid JSON: %(error)s") % {"error": exc}
+            hint = _(
+                "Check that the quotes are straight double quotes and that "
+                "the JSON is complete."
+            )
+            return None, _("Invalid JSON: %(error)s") % {"error": exc} + " " + hint
     return {"raw_email": mail_text}, None
+
+
+def _normalize_json_quotes(text):
+    """Replace typographic quotes pasted from word processors with the
+    straight quotes JSON requires, and drop a UTF-8 BOM if present."""
+    return (
+        text.replace("\ufeff", "")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+        .replace("\u2018", "'")
+        .replace("\u2019", "'")
+    )
 
 
 def _list_refresh(request):

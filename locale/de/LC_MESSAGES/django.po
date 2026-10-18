@@ -215,3 +215,5 @@ msgstr ""
 
 msgid "Sample"
 msgstr ""
+msgid "Check that the quotes are straight double quotes and that the JSON is complete."
+msgstr ""

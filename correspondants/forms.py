@@ -41,7 +41,14 @@ class CapabilityForm(forms.ModelForm):
 
     def clean_config(self):
         raw = self.cleaned_data["config"]
+        normalized = (
+            raw.replace("\ufeff", "")
+            .replace("\u201c", '"')
+            .replace("\u201d", '"')
+            .replace("\u2018", "'")
+            .replace("\u2019", "'")
+        )
         try:
-            return json.loads(raw)
+            return json.loads(normalized)
         except json.JSONDecodeError as exc:
             raise ValidationError(f"Invalid JSON: {exc}")
