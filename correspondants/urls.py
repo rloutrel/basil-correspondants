@@ -33,9 +33,9 @@ urlpatterns = [
         name="capability_delete",
     ),
     path(
-        "correspondants/<str:name>/capabilities/<str:capability_name>/test",
-        views.capability_test,
-        name="capability_test",
+        "correspondants/<str:name>/capabilities/preview",
+        views.capability_preview,
+        name="capability_preview",
     ),
     path(
         "api/correspondants/<str:name>/capacities",

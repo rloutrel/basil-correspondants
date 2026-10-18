@@ -46,6 +46,32 @@
     {% endif %}
   </details>
 
+  <div x-show="type == '{{ parse_mail_pk }}'" x-cloak class="preview-section">
+    <h3>{% trans "Live test" %}</h3>
+    <p class="muted">{% trans "Enter one or two sample mails; the result updates as you edit the JSON." %}</p>
+
+    <label for="id_sample_mail_1">{% trans "Sample mail 1 (JSON or raw email)" %}</label>
+    <textarea name="sample_mail_1" id="id_sample_mail_1" rows="6"
+              hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+              hx-trigger="change delay:500ms"
+              hx-include="[name='config'], [name='sample_mail_1'], [name='sample_mail_2']"
+              hx-target="#preview-results"></textarea>
+
+    <label for="id_sample_mail_2">{% trans "Sample mail 2 (JSON or raw email)" %}</label>
+    <textarea name="sample_mail_2" id="id_sample_mail_2" rows="6"
+              hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+              hx-trigger="change delay:500ms"
+              hx-include="[name='config'], [name='sample_mail_1'], [name='sample_mail_2']"
+              hx-target="#preview-results"></textarea>
+
+    <div id="preview-results"
+         hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+         hx-trigger="change delay:500ms from:[name='config']"
+         hx-include="[name='config'], [name='sample_mail_1'], [name='sample_mail_2']">
+      <p class="muted">{% trans "The result appears here as you type." %}</p>
+    </div>
+  </div>
+
   <label for="{{ form.priority.id_for_label }}">{{ form.priority.label }}</label>
   {{ form.priority }}
   {% for error in form.priority.errors %}<div class="error-message">{{ error }}</div>{% endfor %}

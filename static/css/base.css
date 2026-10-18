@@ -189,3 +189,8 @@ table.capabilities .btn { margin-left: 0.3rem; }
   word-break: break-word;
   margin: 0.4rem 0 0;
 }
+
+/* Live preview in the capability form */
+.preview-section { margin-top: 0.8rem; }
+.preview-section h3 { font-size: 1rem; margin: 0.6rem 0 0.2rem; }
+.preview-result h4 { margin: 0.5rem 0 0.2rem; font-size: 0.9rem; color: var(--text-muted); }

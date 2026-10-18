@@ -210,3 +210,24 @@ msgid ""
 msgstr ""
 "Attendu soit un e-mail brut ({\"raw_email\": \"…\"}), soit un mail parsé "
 "avec les champs sender, object (ou subject) et body."
+
+msgid "Live test"
+msgstr "Test en direct"
+
+msgid ""
+"Enter one or two sample mails; the result updates as you edit the JSON."
+msgstr ""
+"Saisissez un ou deux mails types ; le résultat se met à jour à mesure que "
+"vous modifiez le JSON."
+
+msgid "Sample mail 1 (JSON or raw email)"
+msgstr "Mail type 1 (JSON ou e-mail brut)"
+
+msgid "Sample mail 2 (JSON or raw email)"
+msgstr "Mail type 2 (JSON ou e-mail brut)"
+
+msgid "The result appears here as you type."
+msgstr "Le résultat apparaît ici au fil de la saisie."
+
+msgid "Sample"
+msgstr "Mail type"

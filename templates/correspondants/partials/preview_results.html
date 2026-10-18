@@ -1,0 +1,21 @@
+{% load i18n %}
+<div class="preview-results">
+  {% if errors %}
+    {% for error in errors %}
+      <div class="error-message">{{ error }}</div>
+    {% endfor %}
+  {% endif %}
+  {% for result in results %}
+    <div class="preview-result">
+      <h4>{% trans "Sample" %} {{ result.sample }}</h4>
+      {% if result.error %}
+        <div class="error-message">{{ result.error }}</div>
+      {% else %}
+        <pre class="test-result">{{ result.output }}</pre>
+      {% endif %}
+    </div>
+  {% endfor %}
+  {% if not errors and not results %}
+    <p class="muted">{% trans "The result appears here as you type." %}</p>
+  {% endif %}
+</div>

@@ -290,7 +290,7 @@ class StaticFilesTests(TestCase):
         self.assertTrue(response["Content-Type"].startswith("text/css"))
 
 
-class CapabilityTestViewTests(TestCase):
+class CapabilityPreviewTests(TestCase):
     def setUp(self):
         from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
 
@@ -303,98 +303,77 @@ class CapabilityTestViewTests(TestCase):
             name="freelancermap-pobox-notification",
             config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
         )
-        self.url = reverse(
-            "correspondants:capability_test",
-            args=["freelancermap", "freelancermap-pobox-notification"],
-        )
-
-    def test_list_shows_test_button_for_parse_mail(self):
-        response = self.client.get("/")
-        self.assertContains(response, "/capabilities/freelancermap-pobox-notification/test")
-
-    def test_test_view_renders_input_box(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'name="mail_input"')
-
-    def test_run_with_json_mail(self):
+        self.url = reverse("correspondants:capability_preview", args=["freelancermap"])
         fixture = json.loads(
             (Path(__file__).parent / "fixtures" / "pobox" / "pobox_1.json").read_text(
                 encoding="utf-8"
             )
         )
-        response = self.client.post(self.url, {"mail_input": json.dumps(fixture)})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "matched_template")
-        self.assertContains(response, "4995147")
-        self.assertContains(response, "sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn")
-        self.assertContains(response, "System Test Engineer")
+        self.sample = json.dumps(fixture)
 
-    def test_run_with_raw_email(self):
-        raw = (
-            "From: noreply@freelancermap.de\r\n"
-            "Subject: Some project\r\n"
-            "Content-Type: text/plain\r\n"
-            "\r\n"
-            "utm_campaign=pobox_benachrichtigung\r\n"
-            "https://www.freelancermap.de/posteingang.html"
-            "?id=4995147&context=pobox&token=sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn"
-        )
-        response = self.client.post(self.url, {"mail_input": raw})
+    def preview(self, config, sample_1=None, sample_2=None):
+        return self.client.post(self.url, {
+            "config": config,
+            "sample_mail_1": sample_1 if sample_1 is not None else self.sample,
+            "sample_mail_2": sample_2 or "",
+        })
+
+    def test_preview_with_valid_config_and_sample(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        response = self.preview(json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "matched_template")
         self.assertContains(response, "4995147")
 
-    def test_run_with_raw_email_missing_url_shows_required_error(self):
-        raw = (
-            "From: noreply@freelancermap.de\r\n"
-            "Subject: Some project\r\n"
-            "Content-Type: text/plain\r\n"
-            "\r\n"
-            "utm_campaign=pobox_benachrichtigung"
-        )
-        response = self.client.post(self.url, {"mail_input": raw})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "required extraction")
+    def test_preview_with_two_samples(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
 
-    def test_run_with_empty_input_shows_error(self):
-        response = self.client.post(self.url, {"mail_input": ""})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Paste a mail to test.")
-
-    def test_run_with_invalid_json_shows_error(self):
-        response = self.client.post(self.url, {"mail_input": "{not json"})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Invalid JSON")
-
-    def test_run_preserves_input_value(self):
-        fixture = json.loads(
+        sample_2 = json.loads(
             (Path(__file__).parent / "fixtures" / "pobox" / "pobox_2.json").read_text(
                 encoding="utf-8"
             )
         )
-        payload = json.dumps(fixture)
-        response = self.client.post(self.url, {"mail_input": payload})
+        response = self.preview(
+            json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
+            sample_2=json.dumps(sample_2),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "4995147")
         self.assertContains(response, "4993600")
 
-    def test_run_with_subject_alias(self):
-        response = self.client.post(self.url, {
-            "mail_input": json.dumps({
-                "sender": "noreply@freelancermap.de",
-                "subject": "(Senior) System Test Engineer",
-                "body": "utm_campaign=pobox_benachrichtigung "
-                        "https://www.freelancermap.de/posteingang.html"
-                        "?id=4995147&context=pobox&token=sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn",
-            })
-        })
+    def test_preview_with_invalid_json_config(self):
+        response = self.preview("{not json")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "matched_template")
-        self.assertContains(response, "System Test Engineer")
+        self.assertContains(response, "Invalid JSON")
 
-    def test_run_with_incomplete_mail_shows_detailed_error(self):
-        response = self.client.post(self.url, {
-            "mail_input": json.dumps({"sender": "noreply@freelancermap.de"})
-        })
+    def test_preview_with_schema_invalid_config(self):
+        response = self.preview(json.dumps({"match": {}}))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "sender, object")
-        self.assertContains(response, "does not match any allowed form")
+        self.assertContains(response, "missing required property")
+
+    def test_preview_with_invalid_sample_shows_error(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        response = self.preview(
+            json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
+            sample_1="{not json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
+
+    def test_preview_get_not_allowed(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_capability_form_contains_live_test(self):
+        response = self.client.get(
+            reverse(
+                "correspondants:capability_edit",
+                args=["freelancermap", "freelancermap-pobox-notification"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Live test")
+        self.assertContains(response, 'name="sample_mail_1"')
+        self.assertContains(response, 'name="sample_mail_2"')

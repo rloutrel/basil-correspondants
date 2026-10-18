@@ -55,14 +55,6 @@
                     {% endif %}
                   </td>
                   <td>
-                    {% if capability.capability_type.slug == "parse-mail" %}
-                      <button type="button" class="btn small secondary"
-                              hx-get="{% url 'correspondants:capability_test' correspondant.name capability.name %}"
-                              hx-target="#overlay-content"
-                              @click="overlay = 'form'">
-                        {% trans "Test" %}
-                      </button>
-                    {% endif %}
                     <button type="button" class="btn small secondary"
                             hx-get="{% url 'correspondants:capability_edit' correspondant.name capability.name %}"
                             hx-target="#overlay-content"

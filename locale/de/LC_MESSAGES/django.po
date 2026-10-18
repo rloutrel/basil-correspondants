@@ -198,3 +198,20 @@ msgstr ""
 
 msgid "The mail does not match the expected input format."
 msgstr ""
+msgid "Live test"
+msgstr ""
+
+msgid "Enter one or two sample mails; the result updates as you edit the JSON."
+msgstr ""
+
+msgid "Sample mail 1 (JSON or raw email)"
+msgstr ""
+
+msgid "Sample mail 2 (JSON or raw email)"
+msgstr ""
+
+msgid "The result appears here as you type."
+msgstr ""
+
+msgid "Sample"
+msgstr ""
