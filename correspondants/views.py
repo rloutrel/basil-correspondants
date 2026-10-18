@@ -164,8 +164,13 @@ def capability_test(request, name, capability_name):
                 result = json.dumps(output, indent=2, ensure_ascii=False)
             except CapabilityError as exc:
                 error = str(exc)
-            except SchemaValidationError:
-                error = _("The mail does not match the expected input format.")
+            except SchemaValidationError as exc:
+                expected = _(
+                    "Expected either a raw email ({\"raw_email\": \"…\"}) "
+                    "or a parsed mail with sender, object (or subject) "
+                    "and body fields."
+                )
+                error = expected + " (" + "; ".join(exc.errors) + ")"
     return render(
         request,
         "correspondants/partials/capability_test.html",

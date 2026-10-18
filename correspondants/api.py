@@ -115,7 +115,7 @@ def capability_execute(request, name, capability_name):
     if payload is None:
         return JsonResponse({"detail": "invalid JSON body"}, status=400)
     try:
-        validate(capability.capability_type.input_schema, payload)
+        validate(_effective_input_schema(capability), payload)
     except SchemaValidationError as exc:
         return JsonResponse({"detail": "input validation failed", "errors": exc.errors}, status=400)
     try:
@@ -125,3 +125,12 @@ def capability_execute(request, name, capability_name):
     except CapabilityError as exc:
         return JsonResponse({"detail": str(exc)}, status=502)
     return JsonResponse(output)
+
+def _effective_input_schema(capability):
+    """The catalog constant is the source of truth; the DB copy may lag."""
+    from . import catalog
+
+    entry = catalog.CATALOG_BY_SLUG.get(capability.capability_type.slug)
+    if entry:
+        return entry["input_schema"]
+    return capability.capability_type.input_schema

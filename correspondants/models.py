@@ -87,12 +87,20 @@ class Capability(models.Model):
 
     def clean(self):
         super().clean()
+        schema = self._effective_config_schema()
         try:
-            validate(self.capability_type.config_schema, self.config)
+            validate(schema, self.config)
         except SchemaValidationError as exc:
             raise models.base.ValidationError({"config": exc.errors})
         if self.capability_type.slug == "parse-mail":
             self._validate_parse_mail_patterns()
+
+    def _effective_config_schema(self):
+        """The catalog constant is the source of truth; the DB copy may lag."""
+        entry = catalog.CATALOG_BY_SLUG.get(self.capability_type.slug)
+        if entry:
+            return entry["config_schema"]
+        return self.capability_type.config_schema
 
     def save(self, *args, **kwargs):
         self.full_clean()

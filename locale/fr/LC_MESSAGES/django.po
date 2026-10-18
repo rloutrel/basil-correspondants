@@ -203,3 +203,10 @@ msgstr "JSON invalide : %(error)s"
 
 msgid "The mail does not match the expected input format."
 msgstr "Le mail ne correspond pas au format d'entrée attendu."
+
+msgid ""
+"Expected either a raw email ({\"raw_email\": \"…\"}) or a parsed mail "
+"with sender, object (or subject) and body fields."
+msgstr ""
+"Attendu soit un e-mail brut ({\"raw_email\": \"…\"}), soit un mail parsé "
+"avec les champs sender, object (ou subject) et body."

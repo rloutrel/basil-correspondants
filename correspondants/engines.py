@@ -56,7 +56,7 @@ def execute_capability(capability, payload):
     output = None
     error = ""
     try:
-        validate(capability.capability_type.input_schema, payload)
+        validate(_effective_input_schema(capability), payload)
         if capability.capability_type.slug == "parse-mail":
             siblings = capability.__class__.objects.filter(
                 correspondant_id=capability.correspondant_id,
@@ -141,3 +141,12 @@ def run_read_page(capability, payload):
             {"key": selector["key"], "value": value, "found": found}
         )
     return {"url": url, "extractions": extractions}
+
+def _effective_input_schema(capability):
+    """The catalog constant is the source of truth; the DB copy may lag."""
+    from . import catalog
+
+    entry = catalog.CATALOG_BY_SLUG.get(capability.capability_type.slug)
+    if entry:
+        return entry["input_schema"]
+    return capability.capability_type.input_schema

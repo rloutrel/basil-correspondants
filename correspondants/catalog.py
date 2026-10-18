@@ -107,15 +107,20 @@ PARSE_MAIL_INPUT_SCHEMA = {
         },
         {
             "type": "object",
-            "required": ["sender", "object", "body"],
+            "required": ["sender", "body"],
             "properties": {
                 "sender": {"type": "string"},
                 "object": {
                     "type": "string",
                     "description": "Mail subject (upstream field name).",
                 },
+                "subject": {
+                    "type": "string",
+                    "description": "Mail subject (standard name; alias of object).",
+                },
                 "body": {"type": "string"},
             },
+            "additionalProperties": False,
         },
     ],
     "additionalProperties": False,
@@ -123,6 +128,7 @@ PARSE_MAIL_INPUT_SCHEMA = {
         "raw_email": {"type": "string"},
         "sender": {"type": "string"},
         "object": {"type": "string"},
+        "subject": {"type": "string"},
         "body": {"type": "string"},
     },
 }

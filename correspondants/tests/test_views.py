@@ -376,3 +376,25 @@ class CapabilityTestViewTests(TestCase):
         payload = json.dumps(fixture)
         response = self.client.post(self.url, {"mail_input": payload})
         self.assertContains(response, "4993600")
+
+    def test_run_with_subject_alias(self):
+        response = self.client.post(self.url, {
+            "mail_input": json.dumps({
+                "sender": "noreply@freelancermap.de",
+                "subject": "(Senior) System Test Engineer",
+                "body": "utm_campaign=pobox_benachrichtigung "
+                        "https://www.freelancermap.de/posteingang.html"
+                        "?id=4995147&context=pobox&token=sUXt4TuDSbRbCgv1eCDIRmTLZQfn7Ydwrj1AaiVn",
+            })
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "System Test Engineer")
+
+    def test_run_with_incomplete_mail_shows_detailed_error(self):
+        response = self.client.post(self.url, {
+            "mail_input": json.dumps({"sender": "noreply@freelancermap.de"})
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "sender, object")
+        self.assertContains(response, "does not match any allowed form")
