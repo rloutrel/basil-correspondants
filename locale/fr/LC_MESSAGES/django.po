@@ -167,3 +167,6 @@ msgstr "Ajouter une capacité"
 
 msgid "Confirm deletion"
 msgstr "Confirmer la suppression"
+
+msgid "Example configuration"
+msgstr "Exemple de configuration"

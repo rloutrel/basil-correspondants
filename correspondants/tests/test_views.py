@@ -74,7 +74,9 @@ class CorrespondantCrudTests(TestCase):
                 "enabled": "on",
             },
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Only lowercase letters")
+        self.assertContains(response, "Invalid Name!")
         self.assertFalse(Correspondant.objects.exists())
 
     def test_edit_correspondant(self):
@@ -150,16 +152,47 @@ class CapabilityCrudTests(TestCase):
             reverse("correspondants:capability_create", args=["freelancermap"]),
             self.capability_post_data(config="{not json"),
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
         self.assertFalse(Capability.objects.exists())
 
-    def test_create_capability_schema_invalid_config(self):
+    def test_create_capability_schema_invalid_config_shows_field_errors(self):
         response = self.client.post(
             reverse("correspondants:capability_create", args=["freelancermap"]),
             self.capability_post_data(config=json.dumps({"match": {}})),
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "missing required property")
         self.assertFalse(Capability.objects.exists())
+
+    def test_create_capability_invalid_name_shows_field_error(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(name="Bad Name!"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Only lowercase letters")
+        self.assertContains(response, "Bad Name!")
+        self.assertFalse(Capability.objects.exists())
+
+    def test_capability_form_shows_json_example(self):
+        response = self.client.get(
+            reverse("correspondants:capability_create", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Example configuration")
+        self.assertContains(response, "url_template")
+        self.assertContains(response, "selectors")
+        self.assertContains(response, "match")
+        self.assertContains(response, "extractions")
+        self.assertContains(response, 'x-model="type"')
+
+    def test_capability_form_example_follows_selected_type(self):
+        parse_mail_id = CapabilityType.objects.get(slug="parse-mail").pk
+        response = self.client.get(
+            reverse("correspondants:capability_create", args=["freelancermap"])
+        )
+        self.assertContains(response, 'value="%d"' % parse_mail_id)
 
     def test_edit_capability(self):
         Capability.objects.create(

@@ -155,3 +155,21 @@ table.capabilities .btn { margin-left: 0.3rem; }
   margin: 0.8rem 0;
 }
 .alert-error { border-color: var(--error); }
+/* JSON example in the capability form */
+.json-example { margin-top: 0.4rem; }
+.json-example summary {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.json-example pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0.4rem 0 0;
+}

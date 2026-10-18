@@ -215,4 +215,24 @@ CAPABILITY_CATALOG = [
     },
 ]
 
+EXAMPLE_CONFIGS = {
+    "read-page": {
+        "url_template": "/projects/{reference}",
+        "selectors": [
+            {"key": "title", "selector": "h1", "selector_type": "css"},
+            {"key": "link", "selector": "a.details", "attribute": "href"},
+        ],
+    },
+    "parse-mail": {
+        "match": {
+            "sender": {"type": "contains", "value": "@notifications.example"},
+            "subject": {"type": "regex", "value": "REF-\\d+"},
+        },
+        "extractions": [
+            {"key": "reference", "source": "subject", "pattern": r"(REF-\d+)"},
+            {"key": "client", "source": "body", "pattern": r"Client: (.+)"},
+        ],
+    },
+}
+
 CATALOG_BY_SLUG = {entry["slug"]: entry for entry in CAPABILITY_CATALOG}

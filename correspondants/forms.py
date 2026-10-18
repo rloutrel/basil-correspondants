@@ -3,7 +3,7 @@ import json
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Capability, Correspondant
+from .models import Capability, CapabilityType, Correspondant
 
 
 class CorrespondantForm(forms.ModelForm):
@@ -19,6 +19,10 @@ class CapabilityForm(forms.ModelForm):
     config = forms.CharField(
         label="Configuration (JSON)",
         widget=forms.Textarea(attrs={"rows": 10}),
+    )
+    capability_type = forms.ModelChoiceField(
+        queryset=CapabilityType.objects.all(),
+        widget=forms.Select(attrs={"x-model": "type"}),
     )
 
     class Meta:

@@ -1,10 +1,31 @@
-from django.http import HttpResponse
+import json
+
 from django.shortcuts import get_object_or_404, render
 
 from .forms import CapabilityForm, CorrespondantForm
-from .models import Capability, Correspondant
+from .models import Capability, CapabilityType, Correspondant
 
 CLOSE_EVENT = "close-overlay"
+
+
+def _capability_form_context(request, form, correspondant=None, capability=None):
+    """Context shared by the capability form template (create and edit)."""
+    from .catalog import EXAMPLE_CONFIGS
+
+    example_configs = {
+        slug: json.dumps(example, indent=2, ensure_ascii=False)
+        for slug, example in EXAMPLE_CONFIGS.items()
+    }
+    return {
+        "correspondant": correspondant or (capability.correspondant if capability else None),
+        "form": form,
+        "correspondant_name": (
+            capability.correspondant.name if capability
+            else (correspondant.name if correspondant else None)
+        ),
+        "capability_name": capability.name if capability else None,
+        "example_configs": example_configs,
+    }
 
 
 def correspondant_list(request):
@@ -24,11 +45,12 @@ def correspondant_create(request):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-        return _form_error(request, form)
+    else:
+        form = CorrespondantForm()
     return render(
         request,
         "correspondants/partials/correspondant_form.html",
-        {"form": CorrespondantForm()},
+        {"form": form},
     )
 
 
@@ -39,11 +61,12 @@ def correspondant_edit(request, name):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-        return _form_error(request, form)
+    else:
+        form = CorrespondantForm(instance=correspondant)
     return render(
         request,
         "correspondants/partials/correspondant_form.html",
-        {"correspondant": correspondant, "form": CorrespondantForm(instance=correspondant)},
+        {"form": form, "correspondant": correspondant},
     )
 
 
@@ -61,21 +84,18 @@ def correspondant_delete(request, name):
 
 def capability_create(request, name):
     correspondant = get_object_or_404(Correspondant, name=name)
+    capability = Capability(correspondant=correspondant)
     if request.method == "POST":
-        form = CapabilityForm(request.POST)
-        form.instance.correspondant = correspondant
+        form = CapabilityForm(request.POST, instance=capability)
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-        return _form_error(request, form)
+    else:
+        form = CapabilityForm(instance=capability)
     return render(
         request,
         "correspondants/partials/capability_form.html",
-        {
-            "correspondant": correspondant,
-            "form": CapabilityForm(),
-            "correspondant_name": name,
-        },
+        _capability_form_context(request, form, correspondant=correspondant),
     )
 
 
@@ -88,16 +108,12 @@ def capability_edit(request, name, capability_name):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-        return _form_error(request, form)
+    else:
+        form = CapabilityForm(instance=capability)
     return render(
         request,
         "correspondants/partials/capability_form.html",
-        {
-            "correspondant": capability.correspondant,
-            "form": CapabilityForm(instance=capability),
-            "correspondant_name": name,
-            "capability_name": capability_name,
-        },
+        _capability_form_context(request, form, capability=capability),
     )
 
 
@@ -126,15 +142,3 @@ def _list_refresh(request):
     )
     response.headers["HX-Trigger"] = CLOSE_EVENT
     return response
-
-
-def _form_error(request, form):
-    errors = "; ".join(
-        f"{field}: {'; '.join(errs)}" for field, errs in form.errors.items()
-    )
-    return render(
-        request,
-        "correspondants/partials/form_error.html",
-        {"errors": errors},
-        status=400,
-    )

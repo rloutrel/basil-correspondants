@@ -7,7 +7,8 @@
         method="post" action="{% url 'correspondants:capability_create' correspondant_name %}"
         hx-post="{% url 'correspondants:capability_create' correspondant_name %}"
       {% endif %}
-      hx-target="#correspondant-list" hx-swap="innerHTML">
+      hx-target="#correspondant-list" hx-swap="innerHTML"
+      x-data="{ type: '{{ form.capability_type.value|default:'' }}' }">
   {% csrf_token %}
   <h2>
     {% if capability_name %}
@@ -16,7 +17,43 @@
       {% trans "Add a capability" %}
     {% endif %}
   </h2>
-  {{ form.as_p }}
+
+  {% if form.non_field_errors %}
+    <div class="error-message">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+  {{ form.name }}
+  {% for error in form.name.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
+  <label for="{{ form.capability_type.id_for_label }}">{{ form.capability_type.label }}</label>
+  {{ form.capability_type }}
+  {% for error in form.capability_type.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
+  <label for="{{ form.config.id_for_label }}">{{ form.config.label }}</label>
+  {{ form.config }}
+  {% for error in form.config.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
+  <details class="json-example">
+    <summary>{% trans "Example configuration" %}</summary>
+    <pre x-text="({% for slug, example in example_configs.items %}
+      {% if forloop.first %}'{{ slug }}': `{{ example }}`{% else %},'{{ slug }}': `{{ example }}`{% endif %}
+    {% endfor %})[type] || ''"></pre>
+  </details>
+
+  <label for="{{ form.priority.id_for_label }}">{{ form.priority.label }}</label>
+  {{ form.priority }}
+  {% for error in form.priority.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
+  <label class="checkbox-row" for="{{ form.enabled.id_for_label }}">
+    {{ form.enabled }} {{ form.enabled.label }}
+  </label>
+  {% for error in form.enabled.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
+  <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+  {{ form.description }}
+  {% for error in form.description.errors %}<div class="error-message">{{ error }}</div>{% endfor %}
+
   <div class="form-actions">
     <button type="submit" class="btn">{% trans "Save" %}</button>
     <button type="button" class="btn secondary" @click="overlay = null">{% trans "Cancel" %}</button>
