@@ -45,7 +45,7 @@ def _capability_entry(capability, verbose):
     }
     if verbose:
         base = (
-            f"/correspondants/{capability.correspondant.name}"
+            f"/api/correspondants/{capability.correspondant.name}"
             f"/capacities/{capability.name}"
         )
         entry["resources"] = {"self": base, "execute": f"{base}/execute"}

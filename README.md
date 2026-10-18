@@ -48,10 +48,10 @@ The full specification of the capability system lives in
 ## API overview
 
 ```
-GET  /correspondants/{name}/capacities           list enabled capabilities
-GET  /correspondants/{name}/capacities?verbose=1  … with REST resources
-GET  /correspondants/{name}/capacities/{cap}     detail: schemas + masked config
-POST /correspondants/{name}/capacities/{cap}/execute  run a capability
+GET  /api/correspondants/{name}/capacities           list enabled capabilities
+GET  /api/correspondants/{name}/capacities?verbose=1  … with REST resources
+GET  /api/correspondants/{name}/capacities/{cap}     detail: schemas + masked config
+POST /api/correspondants/{name}/capacities/{cap}/execute  run a capability
 ```
 
 The execute endpoint validates its payload against the capability type's

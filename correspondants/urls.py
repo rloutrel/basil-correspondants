@@ -7,17 +7,17 @@ app_name = "correspondants"
 urlpatterns = [
     path("", views.correspondant_list, name="correspondant_list"),
     path(
-        "correspondants/<str:name>/capacities",
+        "api/correspondants/<str:name>/capacities",
         api.capacities,
         name="capacities",
     ),
     path(
-        "correspondants/<str:name>/capacities/<str:capability_name>",
+        "api/correspondants/<str:name>/capacities/<str:capability_name>",
         api.capability_detail,
         name="capability_detail",
     ),
     path(
-        "correspondants/<str:name>/capacities/<str:capability_name>/execute",
+        "api/correspondants/<str:name>/capacities/<str:capability_name>/execute",
         api.capability_execute,
         name="capability_execute",
     ),

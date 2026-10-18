@@ -69,7 +69,7 @@ class CapacitiesEndpointTests(TestCase):
 
     def test_capacities_shape_and_ordering(self):
         response, data = self.get_json(
-            "/correspondants/freelancermap/capacities"
+            "/api/correspondants/freelancermap/capacities"
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["correspondant"], "freelancermap")
@@ -79,7 +79,7 @@ class CapacitiesEndpointTests(TestCase):
 
     def test_description_falls_back_to_type_description(self):
         _, data = self.get_json(
-            "/correspondants/freelancermap/capacities"
+            "/api/correspondants/freelancermap/capacities"
         )
         entry = data["capacities"][0]
         self.assertEqual(entry["description"], self.parse_mail_type.description)
@@ -88,7 +88,7 @@ class CapacitiesEndpointTests(TestCase):
         self.parse_mail.description = "Extract project references."
         self.parse_mail.save()
         _, data = self.get_json(
-            "/correspondants/freelancermap/capacities"
+            "/api/correspondants/freelancermap/capacities"
         )
         self.assertEqual(
             data["capacities"][0]["description"], "Extract project references."
@@ -96,18 +96,18 @@ class CapacitiesEndpointTests(TestCase):
 
     def test_verbose_mode_lists_resources(self):
         response, data = self.get_json(
-            "/correspondants/freelancermap/capacities?verbose=1"
+            "/api/correspondants/freelancermap/capacities?verbose=1"
         )
         for entry in data["capacities"]:
             self.assertIn("resources", entry)
-            self.assertIn("/correspondants/freelancermap/capacities/", entry["resources"]["self"])
+            self.assertIn("/api/correspondants/freelancermap/capacities/", entry["resources"]["self"])
             self.assertTrue(entry["resources"]["execute"].endswith("/execute"))
 
     def test_disabled_capability_excluded(self):
         self.parse_mail.enabled = False
         self.parse_mail.save()
         _, data = self.get_json(
-            "/correspondants/freelancermap/capacities"
+            "/api/correspondants/freelancermap/capacities"
         )
         self.assertEqual(len(data["capacities"]), 1)
         self.assertEqual(data["capacities"][0]["name"], "read-project-page")
@@ -115,16 +115,16 @@ class CapacitiesEndpointTests(TestCase):
     def test_disabled_correspondant_returns_404(self):
         self.correspondant.enabled = False
         self.correspondant.save()
-        response = self.client.get("/correspondants/freelancermap/capacities")
+        response = self.client.get("/api/correspondants/freelancermap/capacities")
         self.assertEqual(response.status_code, 404)
 
     def test_unknown_correspondant_returns_404(self):
-        response = self.client.get("/correspondants/nope/capacities")
+        response = self.client.get("/api/correspondants/nope/capacities")
         self.assertEqual(response.status_code, 404)
 
     def test_empty_capability_list(self):
         Correspondant.objects.create(name="empty", base_url="https://e.example")
-        _, data = self.get_json("/correspondants/empty/capacities")
+        _, data = self.get_json("/api/correspondants/empty/capacities")
         self.assertEqual(data["capacities"], [])
 
     def test_capability_detail_masks_secrets(self):
@@ -135,7 +135,7 @@ class CapacitiesEndpointTests(TestCase):
         }
         self.read_page.save()
         response = self.client.get(
-            "/correspondants/freelancermap/capacities/read-project-page"
+            "/api/correspondants/freelancermap/capacities/read-project-page"
         )
         data = json.loads(response.content)
         self.assertEqual(data["config"]["auth_token"], "*****")
@@ -168,7 +168,7 @@ class ExecuteEndpointTests(TestCase):
 
     def execute(self, payload):
         return self.client.post(
-            "/correspondants/freelancermap/capacities/parse-project-mail/execute",
+            "/api/correspondants/freelancermap/capacities/parse-project-mail/execute",
             data=json.dumps(payload),
             content_type="application/json",
         )
@@ -212,7 +212,7 @@ class ExecuteEndpointTests(TestCase):
 
     def test_invalid_json_rejected_400(self):
         response = self.client.post(
-            "/correspondants/freelancermap/capacities/parse-project-mail/execute",
+            "/api/correspondants/freelancermap/capacities/parse-project-mail/execute",
             data="{not json",
             content_type="application/json",
         )
@@ -220,7 +220,7 @@ class ExecuteEndpointTests(TestCase):
 
     def test_unknown_capability_404(self):
         response = self.client.post(
-            "/correspondants/freelancermap/capacities/nope/execute",
+            "/api/correspondants/freelancermap/capacities/nope/execute",
             data="{}",
             content_type="application/json",
         )
@@ -245,7 +245,7 @@ class ExecuteEndpointTests(TestCase):
             fetch_page.return_value = "<html><h1>Referentiel</h1></html>"
             extract_selector.return_value = ("Referentiel", True)
             response = self.client.post(
-                "/correspondants/freelancermap/capacities/read-project-page/execute",
+                "/api/correspondants/freelancermap/capacities/read-project-page/execute",
                 data=json.dumps({"url_template_values": {"reference": "PRJ-1"}}),
                 content_type="application/json",
             )
@@ -262,7 +262,7 @@ class ExecuteEndpointTests(TestCase):
             config=READ_PAGE_CONFIG,
         )
         response = self.client.post(
-            "/correspondants/freelancermap/capacities/read-project-page/execute",
+            "/api/correspondants/freelancermap/capacities/read-project-page/execute",
             data=json.dumps({"url_template_values": {}}),
             content_type="application/json",
         )

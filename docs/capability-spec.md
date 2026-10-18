@@ -315,9 +315,9 @@ emails stored as test fixtures, no network, no browser, no AI.
 
 ## 4. API contract — capabilities discovery
 
-Endpoint: `GET /correspondants/{name}/capacities`
+Endpoint: `GET /api/correspondants/{name}/capacities`
 
-Note the URL prefix is `/correspondants/` (the plural of the service domain);
+Note the URL prefix is `/api/correspondants/` — everything API lives behind the `[base]/api/` prefix (the plural of the service domain follows);
 `{name}` is the correspondant `name` slug. The user-visible French label is
 "Capacités" via i18n; URLs stay English/slug-based.
 
@@ -358,7 +358,7 @@ Rules:
 
 ### 4.2 Verbose mode
 
-`GET /correspondants/{name}/capacities?verbose=1` (also `verbose=true`).
+`GET /api/correspondants/{name}/capacities?verbose=1` (also `verbose=true`).
 
 Each entry additionally carries its REST resources:
 
@@ -372,8 +372,8 @@ Each entry additionally carries its REST resources:
       "description": "…",
       "enabled": true,
       "resources": {
-        "self": "/correspondants/freelancermap/capacities/read-project-page",
-        "execute": "/correspondants/freelancermap/capacities/read-project-page/execute"
+        "self": "/api/correspondants/freelancermap/capacities/read-project-page",
+        "execute": "/api/correspondants/freelancermap/capacities/read-project-page/execute"
       }
     }
   ]
@@ -515,7 +515,7 @@ external dependency mocked.
 - Factory fixtures: correspondant `freelancermap` with one `read-page` and two
   `parse-mail` capabilities (different priorities) — proving genericity: the
   fixtures are configuration data, no hard-coded site logic anywhere.
-- `GET /correspondants/{name}/capacities`:
+- `GET /api/correspondants/{name}/capacities`:
   - 200 with expected shape, ordering (type, priority, name);
   - disabled capabilities excluded; disabled correspondant → 404; unknown → 404;
   - `verbose=1` adds `resources` with correct paths;
