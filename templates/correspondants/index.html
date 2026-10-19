@@ -4,30 +4,20 @@
 {% block title %}{% trans "Correspondants" %} — Basil{% endblock %}
 
 {% block content %}
-<div x-data="{ overlay: null }"
-     @close-overlay.window="overlay = null">
-  <h1>{% trans "Correspondants" %}</h1>
-  <p class="muted">
-    {% trans "External sites the house corresponds with, each with its capabilities." %}
-  </p>
+<h1>{% trans "Correspondants" %}</h1>
+<p class="muted">
+  {% trans "External sites the house corresponds with, each with its capabilities." %}
+</p>
 
-  <p>
-    <button type="button" class="btn"
-            hx-get="{% url 'correspondants:correspondant_create' %}"
-            hx-target="#overlay-content"
-            @click="overlay = 'form'">
-      {% trans "Add a correspondant" %}
-    </button>
-  </p>
+<p>
+  <button type="button" class="btn"
+          hx-get="{% url 'correspondants:correspondant_create' %}"
+          hx-target="#correspondant-list" hx-swap="innerHTML">
+    {% trans "Add a correspondant" %}
+  </button>
+</p>
 
-  <div id="correspondant-list">
-    {% include "correspondants/partials/list.html" %}
-  </div>
-
-  <div class="modal-backdrop" x-show="overlay !== null" x-cloak
-       @click.self="overlay = null"
-       @keydown.escape.window="overlay = null">
-    <div class="modal" id="overlay-content"></div>
-  </div>
+<div id="correspondant-list">
+  {% include "correspondants/partials/list.html" %}
 </div>
 {% endblock %}

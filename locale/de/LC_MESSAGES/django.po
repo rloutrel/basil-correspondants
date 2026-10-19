@@ -267,3 +267,17 @@ msgstr ""
 
 msgid "Leave blank to keep the current password."
 msgstr ""
+msgid "New correspondant"
+msgstr ""
+
+msgid "Login configured"
+msgstr ""
+
+msgid "capabilities"
+msgstr ""
+
+msgid "Leave the password blank to keep the current one."
+msgstr ""
+
+msgid "Delete this correspondant and all its capabilities?"
+msgstr ""

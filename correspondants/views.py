@@ -55,13 +55,10 @@ def correspondant_create(request):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-    else:
-        form = CorrespondantForm()
-    return render(
-        request,
-        "correspondants/partials/correspondant_form.html",
-        {"form": form},
-    )
+        return _list_with_correspondant_draft(
+            request, draft_data=request.POST, errors=_form_error_list(form)
+        )
+    return _list_with_correspondant_draft(request)
 
 
 def correspondant_edit(request, name):
@@ -71,25 +68,20 @@ def correspondant_edit(request, name):
         if form.is_valid():
             form.save()
             return _list_refresh(request)
-    else:
-        form = CorrespondantForm(instance=correspondant)
-    return render(
-        request,
-        "correspondants/partials/correspondant_form.html",
-        {"form": form, "correspondant": correspondant},
-    )
+        return _list_with_correspondant_draft(
+            request,
+            correspondant=correspondant,
+            draft_data=request.POST,
+            errors=_form_error_list(form),
+        )
+    return _list_with_correspondant_draft(request, correspondant=correspondant)
 
 
 def correspondant_delete(request, name):
     correspondant = get_object_or_404(Correspondant, name=name)
     if request.method == "POST":
         correspondant.delete()
-        return _list_refresh(request)
-    return render(
-        request,
-        "correspondants/partials/confirm_delete.html",
-        {"name": name},
-    )
+    return _list_refresh(request)
 
 
 def capability_create(request, name):
@@ -308,6 +300,29 @@ def _list_with_draft(request, name, capability=None, draft_data=None, errors=Non
             for key in (
                 "name", "capability_type", "priority", "enabled",
                 "description", "config", "sample_mail_1", "sample_mail_2",
+            )
+        }
+    return render(request, "correspondants/partials/list.html", context)
+
+
+def _list_with_correspondant_draft(
+    request, correspondant=None, draft_data=None, errors=None
+):
+    """Render the list with a correspondant accordion open holding a draft."""
+    correspondants = Correspondant.objects.prefetch_related(
+        "capabilities__capability_type"
+    ).order_by("name")
+    context = {"correspondants": correspondants}
+    context.update(_accordion_context())
+    context["show_new_correspondant"] = correspondant is None
+    context["draft_correspondant"] = correspondant
+    context["draft_errors"] = errors or []
+    if draft_data is not None:
+        context["draft_values"] = {
+            key: draft_data.get(key, "")
+            for key in (
+                "name", "display_name", "base_url", "login", "password",
+                "enabled", "notes",
             )
         }
     return render(request, "correspondants/partials/list.html", context)

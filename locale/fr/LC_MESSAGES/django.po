@@ -290,3 +290,17 @@ msgstr ""
 
 msgid "Leave blank to keep the current password."
 msgstr "Laissez vide pour conserver le mot de passe actuel."
+msgid "New correspondant"
+msgstr "Nouveau correspondant"
+
+msgid "Login configured"
+msgstr "Identifiant configuré"
+
+msgid "capabilities"
+msgstr "capacités"
+
+msgid "Leave the password blank to keep the current one."
+msgstr "Laissez le mot de passe vide pour conserver l'actuel."
+
+msgid "Delete this correspondant and all its capabilities?"
+msgstr "Supprimer ce correspondant et toutes ses capacités ?"

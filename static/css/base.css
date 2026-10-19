@@ -302,3 +302,9 @@ table.capabilities .btn { margin-left: 0.3rem; }
 .htmx-indicator { display: none; }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline-block; }
 .sample-add { margin-top: 0.6rem; }
+
+/* Nested capability accordions inside a correspondant accordion */
+.accordion.nested { background: var(--bg-accent); }
+.accordion.nested > summary { padding: 0.5rem 0.8rem; font-weight: normal; }
+.summary-cta { margin-left: auto; }
+summary .btn { pointer-events: auto; }
