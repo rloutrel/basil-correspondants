@@ -101,12 +101,14 @@
         <div class="sample-content">
           <div class="sample-label">{{ sample.label|default:sample.pk }}</div>
           <details class="sample-details">
-            <summary>{% trans "Show the mail" %}</summary>
-            <pre class="sample-raw">{{ sample.content }}</pre>
+            <summary>{% trans "Show the mail and result" %}</summary>
+            <div class="sample-grid">
+              <pre class="sample-raw">{{ sample.content }}</pre>
+              <div class="sample-result" id="sample-result-{{ sample.pk }}">
+                <p class="muted sample-placeholder">{% trans "The result appears here." %}</p>
+              </div>
+            </div>
           </details>
-        </div>
-        <div class="sample-result" id="sample-result-{{ sample.pk }}">
-          <p class="muted sample-placeholder">{% trans "The result appears here." %}</p>
         </div>
         <div class="sample-actions">
           <button type="button" class="icon-btn sample-run"

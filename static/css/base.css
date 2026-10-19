@@ -269,9 +269,6 @@ table.capabilities .btn { margin-left: 0.3rem; }
 
 /* Sample mails in the capability accordion */
 .sample-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
@@ -279,9 +276,15 @@ table.capabilities .btn { margin-left: 0.3rem; }
   margin-bottom: 0.6rem;
   position: relative;
 }
-.sample-content { min-width: 0; }
+.sample-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+.sample-raw { margin: 0; }
 .sample-result { min-width: 0; display: flex; flex-direction: column; }
-.sample-result .test-result { margin: 0.2rem 0 0; flex: 1; }
+.sample-result .test-result { margin: 0; flex: 1; }
 .sample-actions {
   position: absolute;
   top: 0.5rem;
@@ -298,7 +301,7 @@ table.capabilities .btn { margin-left: 0.3rem; }
 .sample-raw {
   background: var(--bg-accent); border: 1px solid var(--border); border-radius: 6px;
   padding: 0.5rem; font-size: 0.75rem; max-height: 14rem; overflow: auto;
-  white-space: pre-wrap; word-break: break-word; margin: 0.4rem 0 0;
+  white-space: pre-wrap; word-break: break-word;
 }
 .sample-result .test-result { max-height: 16rem; overflow: auto; }
 .sample-result .error-message { margin: 0.2rem 0 0; }
