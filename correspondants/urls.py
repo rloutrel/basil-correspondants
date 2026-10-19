@@ -18,6 +18,16 @@ urlpatterns = [
         name="correspondant_delete",
     ),
     path(
+        "correspondants/<str:name>/toggle",
+        views.correspondant_toggle,
+        name="correspondant_toggle",
+    ),
+    path(
+        "correspondants/<str:name>/capabilities/<str:capability_name>/toggle",
+        views.capability_toggle,
+        name="capability_toggle",
+    ),
+    path(
         "correspondants/<str:name>/capabilities/add",
         views.capability_create,
         name="capability_create",

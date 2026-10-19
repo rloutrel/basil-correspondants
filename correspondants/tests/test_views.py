@@ -476,3 +476,52 @@ class CorrespondantCredentialsTests(TestCase):
     def test_password_not_in_list(self):
         response = self.client.get("/")
         self.assertNotContains(response, "secret-123")
+
+
+class ToggleSwitchTests(TestCase):
+    def setUp(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.de"
+        )
+        self.capability = Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="pobox",
+            config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
+        )
+
+    def test_summary_renders_switches(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode().count("summary-switch"), 2)
+        self.assertContains(response, 'role="switch"')
+
+    def test_toggle_correspondant(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_toggle", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.correspondant.refresh_from_db()
+        self.assertFalse(self.correspondant.enabled)
+
+    def test_toggle_capability(self):
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_toggle",
+                args=["freelancermap", "pobox"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.capability.refresh_from_db()
+        self.assertFalse(self.capability.enabled)
+
+    def test_toggle_back_on(self):
+        self.correspondant.enabled = False
+        self.correspondant.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:correspondant_toggle", args=["freelancermap"])
+        )
+        self.correspondant.refresh_from_db()
+        self.assertTrue(self.correspondant.enabled)

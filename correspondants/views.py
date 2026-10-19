@@ -118,6 +118,24 @@ def capability_edit(request, name, capability_name):
     return _list_refresh(request)
 
 
+def correspondant_toggle(request, name):
+    correspondant = get_object_or_404(Correspondant, name=name)
+    if request.method == "POST":
+        correspondant.enabled = not correspondant.enabled
+        correspondant.save(update_fields=["enabled"])
+    return _list_refresh(request)
+
+
+def capability_toggle(request, name, capability_name):
+    capability = get_object_or_404(
+        Capability, correspondant__name=name, name=capability_name
+    )
+    if request.method == "POST":
+        capability.enabled = not capability.enabled
+        capability.save(update_fields=["enabled"])
+    return _list_refresh(request)
+
+
 def capability_delete(request, name, capability_name):
     capability = get_object_or_404(
         Capability, correspondant__name=name, name=capability_name
