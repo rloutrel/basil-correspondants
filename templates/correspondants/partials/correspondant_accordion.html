@@ -1,0 +1,58 @@
+{% load i18n %}
+<form class="inline-edit-form"
+      {% if correspondant %}
+        hx-post="{% url 'correspondants:correspondant_edit' correspondant.name %}"
+      {% else %}
+        hx-post="{% url 'correspondants:correspondant_create' %}"
+      {% endif %}
+      hx-target="#correspondant-list" hx-swap="innerHTML">
+  {% csrf_token %}
+  {% if draft_errors %}
+    <div class="error-message">
+      {% for error in draft_errors %}{{ error }}{% if not forloop.last %}; {% endif %}{% endfor %}
+    </div>
+  {% endif %}
+  <div class="inline-fields">
+    <label class="inline-field span-4">
+      <span class="inline-label">{% trans "Name" %}</span>
+      <input type="text" name="name" maxlength="64" required
+             value="{% if draft_values %}{{ draft_values.name }}{% else %}{{ correspondant.name|default:'' }}{% endif %}"
+             placeholder="freelancermap">
+    </label>
+    <label class="inline-field span-4">
+      <span class="inline-label">{% trans "Display name" %}</span>
+      <input type="text" name="display_name" maxlength="128"
+             value="{% if draft_values %}{{ draft_values.display_name }}{% else %}{{ correspondant.display_name|default:'' }}{% endif %}">
+    </label>
+    <label class="inline-field span-4">
+      <span class="inline-label">{% trans "Base URL" %}</span>
+      <input type="url" name="base_url" required
+             value="{% if draft_values %}{{ draft_values.base_url }}{% else %}{{ correspondant.base_url|default:'' }}{% endif %}"
+             placeholder="https://www.freelancermap.de">
+    </label>
+    <label class="inline-field span-4">
+      <span class="inline-label">{% trans "Login" %}</span>
+      <input type="text" name="login" autocomplete="off"
+             value="{% if draft_values %}{{ draft_values.login }}{% else %}{{ correspondant.login|default:'' }}{% endif %}">
+    </label>
+    <label class="inline-field span-4">
+      <span class="inline-label">{% trans "Password" %}</span>
+      <input type="text" name="password" autocomplete="off" placeholder="(unchanged)">
+    </label>
+    <label class="inline-field span-12">
+      <span class="inline-label">{% trans "Notes" %}</span>
+      <textarea name="notes" rows="2">{% if draft_values %}{{ draft_values.notes }}{% else %}{{ correspondant.notes|default:'' }}{% endif %}</textarea>
+    </label>
+  </div>
+  <p class="meta">{% trans "Leave the password blank to keep the current one." %}</p>
+  <div class="inline-actions">
+    <button type="submit" class="btn small">{% trans "Save" %}</button>
+    {% if not correspondant %}
+      <button type="button" class="btn small secondary"
+              hx-get="{% url 'correspondants:correspondant_list' %}"
+              hx-target="#correspondant-list" hx-swap="innerHTML">
+        {% trans "Cancel" %}
+      </button>
+    {% endif %}
+  </div>
+</form>

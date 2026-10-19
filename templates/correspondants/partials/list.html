@@ -1,0 +1,94 @@
+{% load i18n %}
+<div class="cards">
+  {% if show_new_correspondant or draft_errors and not draft_correspondant %}
+    <details class="accordion config-item" open id="correspondant-new">
+      <summary>
+        <span class="accordion-title">{% trans "New correspondant" %}</span>
+        <span class="accordion-chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="accordion-body">
+        {% include "correspondants/partials/correspondant_accordion.html" %}
+      </div>
+    </details>
+  {% endif %}
+
+  {% for correspondant in correspondants %}
+    <details class="accordion config-item" id="correspondant-{{ correspondant.pk }}"
+             {% if draft_correspondant and draft_correspondant.pk == correspondant.pk %}open{% endif %}>
+      <summary>
+        <span class="accordion-title">{{ correspondant.display_name|default:correspondant.name }}</span>
+        <span class="summary-frequency">{{ correspondant.base_url }}</span>
+        {% if correspondant.login %}
+          <span class="badge neutral" title="{% trans 'Login configured' %}">🔑</span>
+        {% endif %}
+        <span class="badge neutral">{{ correspondant.capabilities.count }} {% trans "capabilities" %}</span>
+        <button type="button" class="btn small secondary"
+                hx-get="{% url 'correspondants:correspondant_edit' correspondant.name %}"
+                hx-target="#correspondant-list" hx-swap="innerHTML"
+                onclick="event.preventDefault(); event.stopPropagation();">
+          {% trans "Edit" %}
+        </button>
+        {% url 'correspondants:correspondant_toggle' correspondant.name as corr_toggle_url %}
+        {% include "correspondants/partials/summary_switch.html" with enabled=correspondant.enabled toggle_url=corr_toggle_url %}
+        
+        <span class="accordion-chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="accordion-body">
+        {% if draft_correspondant and draft_correspondant.pk == correspondant.pk %}
+          {% include "correspondants/partials/correspondant_accordion.html" with correspondant=correspondant %}
+        {% else %}
+          <div class="card-actions">
+            <button type="button" class="btn small"
+                    hx-get="{% url 'correspondants:capability_create' correspondant.name %}"
+                    hx-target="#correspondant-list" hx-swap="innerHTML">
+              {% trans "Add a capability" %}
+            </button>
+            <button type="button" class="btn small danger"
+                    hx-post="{% url 'correspondants:correspondant_delete' correspondant.name %}"
+                    hx-confirm="{% trans 'Delete this correspondant and all its capabilities?' %}"
+                    hx-target="#correspondant-list" hx-swap="innerHTML">
+              {% trans "Delete" %}
+            </button>
+          </div>
+          <p class="meta">
+            <a href="{{ correspondant.base_url }}" rel="noopener">{{ correspondant.base_url }}</a>
+            {% if correspondant.notes %} — {{ correspondant.notes }}{% endif %}
+          </p>
+          {% if draft_correspondant_name == correspondant.name and not draft_capability %}
+            <details class="accordion nested new-draft" open>
+              <summary>
+                <span class="accordion-title">{% trans "New capability" %}</span>
+                <span class="accordion-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="accordion-body">
+                {% include "correspondants/partials/capability_accordion.html" with correspondant_name=correspondant.name %}
+              </div>
+            </details>
+          {% endif %}
+          {% if correspondant.capabilities.all %}
+            {% for capability in correspondant.capabilities.all %}
+              <details class="accordion nested" id="capability-{{ capability.pk }}">
+                <summary>
+                  <span class="accordion-title">{{ capability.name }}</span>
+                  <span class="badge neutral">{{ capability.capability_type.slug }}</span>
+                  <span class="summary-frequency" title="{% trans 'Priority' %}">{{ capability.priority }}</span>
+                  {% url 'correspondants:capability_toggle' correspondant.name capability.name as cap_toggle_url %}
+                {% include "correspondants/partials/summary_switch.html" with enabled=capability.enabled toggle_url=cap_toggle_url %}
+
+                  <span class="accordion-chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="accordion-body">
+                  {% include "correspondants/partials/capability_accordion.html" with capability=capability correspondant_name=correspondant.name %}
+                </div>
+              </details>
+            {% endfor %}
+          {% else %}
+            <p class="meta">{% trans "No capability configured." %}</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </details>
+  {% empty %}
+    <p class="empty">{% trans "No correspondant configured yet." %}</p>
+  {% endfor %}
+</div>

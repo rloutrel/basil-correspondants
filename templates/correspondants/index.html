@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Correspondants" %} — Basil{% endblock %}
+
+{% block content %}
+<h1>{% trans "Correspondants" %}</h1>
+<p class="muted">
+  {% trans "External sites the house corresponds with, each with its capabilities." %}
+</p>
+
+<p>
+  <button type="button" class="btn"
+          hx-get="{% url 'correspondants:correspondant_create' %}"
+          hx-target="#correspondant-list" hx-swap="innerHTML">
+    {% trans "Add a correspondant" %}
+  </button>
+</p>
+
+<div id="correspondant-list">
+  {% include "correspondants/partials/list.html" %}
+</div>
+{% endblock %}

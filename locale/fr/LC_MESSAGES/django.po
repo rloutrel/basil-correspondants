@@ -1,0 +1,310 @@
+# Basil — correspondants component — French translations.
+# This file is distributed under the MIT license.
+msgid ""
+msgstr ""
+"Project-Id-Version: basil-correspondants\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "correspondant"
+msgstr "correspondant"
+
+msgid "correspondants"
+msgstr "correspondants"
+
+msgid "capability type"
+msgstr "type de capacité"
+
+msgid "capability types"
+msgstr "types de capacité"
+
+msgid "capability"
+msgstr "capacité"
+
+msgid "capabilities"
+msgstr "capacités"
+
+msgid "capability execution"
+msgstr "exécution de capacité"
+
+msgid "capability executions"
+msgstr "exécutions de capacité"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Display name"
+msgstr "Nom affiché"
+
+msgid "Base URL"
+msgstr "URL de base"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Input schema"
+msgstr "Schéma d'entrée"
+
+msgid "Output schema"
+msgstr "Schéma de sortie"
+
+msgid "Config schema"
+msgstr "Schéma de configuration"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Priority"
+msgstr "Priorité"
+
+msgid "Input"
+msgstr "Entrée"
+
+msgid "Output"
+msgstr "Sortie"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Success"
+msgstr "Succès"
+
+msgid "Duration (ms)"
+msgstr "Durée (ms)"
+
+msgid "Only lowercase letters, digits and hyphens are allowed."
+msgstr "Seules les minuscules, les chiffres et les tirets sont autorisés."
+
+msgid "Correspondants"
+msgstr "Correspondants"
+
+msgid "Toggle dark mode"
+msgstr "Basculer le mode sombre"
+
+msgid "No capability configured."
+msgstr "Aucune capacité configurée."
+
+msgid "No correspondant configured yet."
+msgstr "Aucun correspondant configuré pour l'instant."
+
+msgid "External sites the house corresponds with, each with its capabilities."
+msgstr "Les sites externes avec lesquels la maison correspond, chacun avec ses capacités."
+
+msgid "Add a correspondant"
+msgstr "Ajouter un correspondant"
+
+msgid "Add a capability"
+msgstr "Ajouter une capacité"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Disabled"
+msgstr "Désactivé"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Capability"
+msgstr "Capacité"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Priority"
+msgstr "Priorité"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Configuration (JSON)"
+msgstr "Configuration (JSON)"
+
+msgid "Could not save"
+msgstr "Impossible d'enregistrer"
+
+msgid "Delete correspondant %(name)s and all its capabilities?"
+msgstr "Supprimer le correspondant %(name)s et toutes ses capacités ?"
+
+msgid "Delete capability %(name)s?"
+msgstr "Supprimer la capacité %(name)s ?"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Edit correspondant"
+msgstr "Modifier le correspondant"
+
+msgid "Edit capability"
+msgstr "Modifier la capacité"
+
+msgid "Add a capability"
+msgstr "Ajouter une capacité"
+
+msgid "Confirm deletion"
+msgstr "Confirmer la suppression"
+
+msgid "Example configuration"
+msgstr "Exemple de configuration"
+
+msgid "Select a capability type to see its example."
+msgstr "Sélectionnez un type de capacité pour voir son exemple."
+
+msgid "No example available."
+msgstr "Aucun exemple disponible."
+
+msgid "Test"
+msgstr "Tester"
+
+msgid "Test capability"
+msgstr "Tester la capacité"
+
+msgid "Mail to test (JSON or raw email)"
+msgstr "Mail à tester (JSON ou e-mail brut)"
+
+msgid "Run the test"
+msgstr "Lancer le test"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Result"
+msgstr "Résultat"
+
+msgid "Paste a mail to test."
+msgstr "Collez un mail à tester."
+
+msgid "Invalid JSON: %(error)s"
+msgstr "JSON invalide : %(error)s"
+
+msgid "The mail does not match the expected input format."
+msgstr "Le mail ne correspond pas au format d'entrée attendu."
+
+msgid ""
+"Expected either a raw email ({\"raw_email\": \"…\"}) or a parsed mail "
+"with sender, object (or subject) and body fields."
+msgstr ""
+"Attendu soit un e-mail brut ({\"raw_email\": \"…\"}), soit un mail parsé "
+"avec les champs sender, object (ou subject) et body."
+
+msgid "Live test"
+msgstr "Test en direct"
+
+msgid ""
+"Enter one or two sample mails; the result updates as you edit the JSON."
+msgstr ""
+"Saisissez un ou deux mails types ; le résultat se met à jour à mesure que "
+"vous modifiez le JSON."
+
+msgid "Sample mail 1 (JSON or raw email)"
+msgstr "Mail type 1 (JSON ou e-mail brut)"
+
+msgid "Sample mail 2 (JSON or raw email)"
+msgstr "Mail type 2 (JSON ou e-mail brut)"
+
+msgid "The result appears here as you type."
+msgstr "Le résultat apparaît ici au fil de la saisie."
+
+msgid "Sample"
+msgstr "Mail type"
+
+msgid ""
+"Check that the quotes are straight double quotes and that the JSON is "
+"complete."
+msgstr ""
+"Vérifiez que les guillemets sont des doubles quotes droites et que le JSON "
+"est complet."
+msgid "New capability"
+msgstr "Nouvelle capacité"
+msgid "Delete this capability?"
+msgstr "Supprimer cette capacité ?"
+msgid "Sample mails"
+msgstr "Mails types"
+
+msgid "Saved for future tests; run each one to see the result."
+msgstr "Enregistrés pour de futurs tests ; lancez chacun pour voir le résultat."
+
+msgid "Show the mail"
+msgstr "Afficher le mail"
+
+msgid "Run"
+msgstr "Lancer"
+
+msgid "Delete this sample mail?"
+msgstr "Supprimer ce mail type ?"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Notification mail"
+msgstr "Mail de notification"
+
+msgid "New sample mail (JSON or raw email)"
+msgstr "Nouveau mail type (JSON ou e-mail brut)"
+
+msgid "Save the capability first to attach sample mails."
+msgstr "Enregistrez d'abord la capacité pour attacher des mails types."
+
+msgid "Save the sample mail"
+msgstr "Enregistrer le mail type"
+
+msgid "The result appears here."
+msgstr "Le résultat apparaît ici."
+msgid "Login"
+msgstr "Identifiant"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Account login on the site."
+msgstr "Identifiant du compte sur le site."
+
+msgid ""
+"Account password on the site; never sent back to the browser."
+msgstr ""
+"Mot de passe du compte sur le site ; jamais renvoyé au navigateur."
+
+msgid "Leave blank to keep the current password."
+msgstr "Laissez vide pour conserver le mot de passe actuel."
+msgid "New correspondant"
+msgstr "Nouveau correspondant"
+
+msgid "Login configured"
+msgstr "Identifiant configuré"
+
+msgid "capabilities"
+msgstr "capacités"
+
+msgid "Leave the password blank to keep the current one."
+msgstr "Laissez le mot de passe vide pour conserver l'actuel."
+
+msgid "Delete this correspondant and all its capabilities?"
+msgstr "Supprimer ce correspondant et toutes ses capacités ?"
+msgid "Add a sample mail"
+msgstr "Ajouter un mail type"
+msgid "Show the mail and result"
+msgstr "Afficher le mail et le résultat"

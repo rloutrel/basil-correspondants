@@ -1,0 +1,134 @@
+{% load i18n json_tags %}
+<form class="inline-edit-form"
+      {% if capability %}
+        hx-post="{% url 'correspondants:capability_edit' correspondant_name capability.name %}"
+      {% else %}
+        hx-post="{% url 'correspondants:capability_create' correspondant_name %}"
+      {% endif %}
+      hx-target="#correspondant-list" hx-swap="innerHTML">
+  {% csrf_token %}
+  {% if draft_errors %}
+    <div class="error-message">
+      {% for error in draft_errors %}{{ error }}{% if not forloop.last %}; {% endif %}{% endfor %}
+    </div>
+  {% endif %}
+  <div class="inline-fields">
+    <label class="inline-field span-6">
+      <span class="inline-label">{% trans "Name" %}</span>
+      <input type="text" name="name" maxlength="64" required
+             value="{% if draft_values %}{{ draft_values.name }}{% else %}{{ capability.name|default:'' }}{% endif %}"
+             placeholder="freelancermap-pobox-notification">
+    </label>
+    <label class="inline-field span-3">
+      <span class="inline-label">{% trans "Capability type" %}</span>
+      <select name="capability_type" required>
+        {% for ct in capability_types %}
+          <option value="{{ ct.pk }}"
+                  {% if draft_values and draft_values.capability_type == ct.pk|stringformat:"s" %}selected{% elif capability and capability.capability_type_id == ct.pk %}selected{% endif %}>{{ ct.slug }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="inline-field span-3">
+      <span class="inline-label">{% trans "Priority" %}</span>
+      <input type="number" name="priority" required
+             value="{% if draft_values %}{{ draft_values.priority }}{% else %}{{ capability.priority|default:0 }}{% endif %}">
+    </label>
+    <label class="inline-field span-12">
+      <span class="inline-label">{% trans "Description" %}</span>
+      <input type="text" name="description"
+             value="{% if draft_values %}{{ draft_values.description }}{% else %}{{ capability.description|default:'' }}{% endif %}">
+    </label>
+    <label class="inline-field span-12">
+      <span class="inline-label">{% trans "Configuration (JSON)" %}</span>
+      <textarea name="config" id="config-{{ capability.pk|default:'new' }}" rows="8">{% if draft_values %}{{ draft_values.config }}{% else %}{{ capability.config|to_json }}{% endif %}</textarea>
+    </label>
+  </div>
+
+  <details class="json-example">
+    <summary>{% trans "Example configuration" %}</summary>
+    {% for type_pk, example in example_configs.items %}
+      <pre>{{ example }}</pre>
+    {% endfor %}
+  </details>
+
+  <div class="inline-actions">
+    <button type="submit" class="btn small">{% trans "Save" %}</button>
+    {% if capability %}
+      <button type="button" class="btn small danger"
+              hx-post="{% url 'correspondants:capability_delete' correspondant_name capability.name %}"
+              hx-confirm="{% trans 'Delete this capability?' %}"
+              hx-target="#correspondant-list" hx-swap="innerHTML">
+        {% trans "Delete" %}
+      </button>
+    {% endif %}
+  </div>
+</form>
+
+{% if capability %}
+  <div class="preview-section" x-data="{ adding: false }">
+    <div class="config-section-header">
+      <h3>{% trans "Sample mails" %}</h3>
+      <button type="button" class="btn round add-btn"
+              title="{% trans 'Add a sample mail' %}"
+              aria-label="{% trans 'Add a sample mail' %}"
+              @click="adding = !adding">+</button>
+    </div>
+
+    <form class="sample-add" x-show="adding" x-cloak
+          hx-post="{% url 'correspondants:sample_mail_add' correspondant_name capability.name %}"
+          hx-target="#correspondant-list" hx-swap="innerHTML">
+      {% csrf_token %}
+      <div class="inline-fields">
+        <label class="inline-field span-3">
+          <span class="inline-label">{% trans "Label" %}</span>
+          <input type="text" name="sample_label" placeholder="{% trans 'Notification mail' %}">
+        </label>
+        <label class="inline-field span-9">
+          <span class="inline-label">{% trans "New sample mail (JSON or raw email)" %}</span>
+          <textarea name="sample_content" rows="4"></textarea>
+        </label>
+      </div>
+      <button type="submit" class="btn small">{% trans "Save the sample mail" %}</button>
+    </form>
+
+    {% for sample in capability.sample_mails.all %}
+      <div class="sample-row">
+        <div class="sample-content">
+          <div class="sample-label">{{ sample.label|default:sample.pk }}</div>
+          <details class="sample-details">
+            <summary>{% trans "Show the mail and result" %}</summary>
+            <div class="sample-grid">
+              <pre class="sample-raw">{{ sample.content }}</pre>
+              <div class="sample-result" id="sample-result-{{ sample.pk }}">
+                <p class="muted sample-placeholder">{% trans "The result appears here." %}</p>
+              </div>
+            </div>
+          </details>
+        </div>
+        <div class="sample-actions">
+          <button type="button" class="icon-btn sample-run"
+                  title="{% trans 'Run' %}" aria-label="{% trans 'Run' %}"
+                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                  hx-vals='{"sample_id": "{{ sample.pk }}"}'
+                  hx-include="#config-{{ capability.pk }}"
+                  hx-target="#sample-result-{{ sample.pk }}"
+                  hx-swap="innerHTML"
+                  hx-indicator="this">
+            <span class="icon-run">&#9654;</span>
+            <span class="spinner mini"></span>
+          </button>
+          <form class="inline-form"
+                hx-post="{% url 'correspondants:sample_mail_delete' correspondant_name capability.name sample.pk %}"
+                hx-target="#correspondant-list" hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="icon-btn sample-delete"
+                    title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"
+                    hx-confirm="{% trans 'Delete this sample mail?' %}">&#128465;</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="muted preview-section">{% trans "Save the capability first to attach sample mails." %}</p>
+{% endif %}

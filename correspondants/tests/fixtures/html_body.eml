@@ -1,0 +1,10 @@
+From: notifications@freelancermap.example
+To: basil@example.com
+Subject: Project update PRJ-2026-0142
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>The project <b>Referentiel E-commerce</b> was updated.</p>
+<p>Budget changed to 50000 EUR.</p>
+</body></html>

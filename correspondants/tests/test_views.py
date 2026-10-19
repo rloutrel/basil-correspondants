@@ -1,0 +1,563 @@
+import json
+from pathlib import Path
+import os
+
+from django.test import TestCase
+from django.urls import reverse
+
+from correspondants.models import Capability, CapabilityType, Correspondant
+
+PARSE_MAIL_CONFIG = {
+    "match": {"sender": {"type": "contains", "value": "@freelancermap.example"}},
+    "extractions": [
+        {"key": "reference", "source": "subject", "pattern": r"PRJ-\d+-\d+"}
+    ],
+}
+
+
+class IndexViewTests(TestCase):
+    def test_index_renders_correspondants(self):
+        correspondant = Correspondant.objects.create(
+            name="freelancermap",
+            display_name="Freelancermap",
+            base_url="https://www.freelancermap.example",
+        )
+        Capability.objects.create(
+            correspondant=correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Freelancermap")
+        self.assertContains(response, "parse-project-mail")
+
+    def test_index_empty_state(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No correspondant configured yet.")
+
+    def test_login_redirect_target_resolves(self):
+        from django.conf import settings
+        from django.urls import resolve, reverse
+
+        self.assertEqual(settings.LOGIN_REDIRECT_URL, "correspondants:correspondant_list")
+        match = resolve(reverse(settings.LOGIN_REDIRECT_URL))
+        self.assertEqual(match.view_name, "correspondants:correspondant_list")
+
+
+class CorrespondantCrudTests(TestCase):
+    def test_create_correspondant(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "freelancermap",
+                "display_name": "Freelancermap",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+                "notes": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            Correspondant.objects.filter(name="freelancermap").exists()
+        )
+        self.assertContains(response, "freelancermap")
+        self.assertEqual(response.headers["HX-Trigger"], "close-overlay")
+
+    def test_create_correspondant_invalid_name(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "Invalid Name!",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Only lowercase letters")
+        self.assertContains(response, "Invalid Name!")
+        self.assertFalse(Correspondant.objects.exists())
+
+    def test_edit_correspondant(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            {
+                "name": "freelancermap",
+                "display_name": "Freelancermap",
+                "base_url": "https://www.freelancermap.example",
+                "enabled": "on",
+                "notes": "updated note",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Correspondant.objects.get(name="freelancermap").notes, "updated note"
+        )
+
+    def test_delete_correspondant(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.post(
+            reverse("correspondants:correspondant_delete", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Correspondant.objects.exists())
+
+    def test_edit_form_renders(self):
+        Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+        response = self.client.get(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "freelancermap")
+
+
+class CapabilityCrudTests(TestCase):
+    def setUp(self):
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.example"
+        )
+
+    def capability_post_data(self, **overrides):
+        data = {
+            "name": "parse-project-mail",
+            "capability_type": str(CapabilityType.objects.get(slug="parse-mail").pk),
+            "config": json.dumps(PARSE_MAIL_CONFIG),
+            "enabled": "on",
+            "priority": "0",
+            "description": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_create_capability(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(),
+        )
+        self.assertEqual(response.status_code, 200)
+        capability = Capability.objects.get(name="parse-project-mail")
+        self.assertEqual(capability.config, PARSE_MAIL_CONFIG)
+        self.assertEqual(response.headers["HX-Trigger"], "close-overlay")
+
+    def test_create_capability_invalid_json(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(config="{not json"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
+        self.assertFalse(Capability.objects.exists())
+
+    def test_create_capability_schema_invalid_config_shows_field_errors(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(config=json.dumps({"match": {}})),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "missing required property")
+        self.assertFalse(Capability.objects.exists())
+
+    def test_create_capability_invalid_name_shows_field_error(self):
+        response = self.client.post(
+            reverse("correspondants:capability_create", args=["freelancermap"]),
+            self.capability_post_data(name="Bad Name!"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Only lowercase letters")
+        self.assertContains(response, "Bad Name!")
+        self.assertFalse(Capability.objects.exists())
+
+    def test_create_form_renders_example(self):
+        response = self.client.get(
+            reverse("correspondants:capability_create", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "New capability")
+        self.assertContains(response, "url_template")
+        self.assertContains(response, "extractions")
+        self.assertContains(response, 'name="config"')
+
+    def test_edit_capability(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_edit",
+                args=["freelancermap", "parse-project-mail"],
+            ),
+            self.capability_post_data(priority="5"),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Capability.objects.get(name="parse-project-mail").priority, 5
+        )
+
+    def test_list_renders_capability_accordion_with_config(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "accordion")
+        self.assertContains(response, "parse-project-mail")
+        self.assertContains(response, "PRJ-")
+        self.assertContains(response, 'name="sample_content"')
+
+    def test_delete_capability(self):
+        Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="parse-project-mail",
+            config=PARSE_MAIL_CONFIG,
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_delete",
+                args=["freelancermap", "parse-project-mail"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Capability.objects.exists())
+
+
+class LanguageSwitchTests(TestCase):
+    def test_index_contains_language_form(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="lang-form"')
+        self.assertContains(response, 'id="lang-select"')
+        for code, flag in (("de", "🇩🇪"), ("fr", "🇫🇷"), ("en", "🇬🇧")):
+            self.assertContains(response, f'value="{code}"')
+
+    def test_set_language_switches_to_french(self):
+        from django.conf import settings
+
+        response = self.client.post(
+            "/i18n/setlang/", {"language": "fr", "next": "/"}
+        )
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get("/")
+        self.assertContains(response, "Ajouter un correspondant")
+
+    def test_base_uses_shared_ui_charte(self):
+        response = self.client.get("/")
+        self.assertContains(response, "/static/css/base.")
+        self.assertContains(response, "basil-language")
+        self.assertContains(response, "htmx.org")
+        self.assertContains(response, "alpinejs")
+
+
+class StaticFilesTests(TestCase):
+    def test_base_css_served_with_css_mime_type(self):
+        from django.conf import settings
+
+        if not os.path.isdir(settings.STATIC_ROOT):
+            self.skipTest("collectstatic has not been run")
+        response = self.client.get("/static/css/base.css")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/css"))
+
+
+class CapabilityPreviewTests(TestCase):
+    def setUp(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.de"
+        )
+        self.capability = Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="freelancermap-pobox-notification",
+            config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
+        )
+        self.config_json = json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG)
+        fixture = json.loads(
+            (Path(__file__).parent / "fixtures" / "pobox" / "pobox_1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.sample_content = json.dumps(fixture)
+        self.preview_url = reverse(
+            "correspondants:capability_preview", args=["freelancermap"]
+        )
+
+    def test_sample_mail_saved_and_listed(self):
+        from correspondants.models import CapabilitySampleMail
+
+        response = self.client.post(
+            reverse(
+                "correspondants:sample_mail_add",
+                args=["freelancermap", "freelancermap-pobox-notification"],
+            ),
+            {"sample_label": "Notification", "sample_content": self.sample_content},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CapabilitySampleMail.objects.count(), 1)
+        sample = CapabilitySampleMail.objects.get()
+        self.assertEqual(sample.label, "Notification")
+        self.assertContains(response, "sample-row")
+
+    def test_sample_mail_delete(self):
+        from correspondants.models import CapabilitySampleMail
+
+        sample = CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.post(
+            reverse(
+                "correspondants:sample_mail_delete",
+                args=["freelancermap", "freelancermap-pobox-notification", sample.pk],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CapabilitySampleMail.objects.count(), 0)
+
+    def test_preview_on_saved_sample(self):
+        from correspondants.models import CapabilitySampleMail
+
+        sample = CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.post(self.preview_url, {
+            "config": self.config_json,
+            "sample_id": str(sample.pk),
+            "sample_content": "",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "4995147")
+
+    def test_preview_on_unsaved_content(self):
+        response = self.client.post(self.preview_url, {
+            "config": self.config_json,
+            "sample_content": self.sample_content,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "matched_template")
+
+    def test_preview_with_invalid_json_config(self):
+        response = self.client.post(self.preview_url, {
+            "config": "{not json",
+            "sample_content": self.sample_content,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
+
+    def test_preview_with_schema_invalid_config(self):
+        response = self.client.post(self.preview_url, {
+            "config": json.dumps({"match": {}}),
+            "sample_content": self.sample_content,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "missing required property")
+
+    def test_preview_get_not_allowed(self):
+        response = self.client.get(self.preview_url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_new_sample_mail_inserted_first(self):
+        from correspondants.models import CapabilitySampleMail
+
+        CapabilitySampleMail.objects.create(
+            capability=self.capability, label="Old first", content="{}",
+        )
+        add_url = reverse(
+            "correspondants:sample_mail_add",
+            args=["freelancermap", "freelancermap-pobox-notification"],
+        )
+        self.client.post(add_url, {"sample_label": "New", "sample_content": "{}"})
+        samples = list(CapabilitySampleMail.objects.all())
+        self.assertEqual(samples[0].label, "New")
+        self.assertEqual(samples[0].position, 0)
+
+    def test_preview_accepts_typographic_quotes(self):
+        curly_sample = self.sample_content.replace('"', "\u201c")
+        curly_config = self.config_json.replace('"', "\u201c")
+        response = self.client.post(self.preview_url, {
+            "config": curly_config,
+            "sample_content": curly_sample,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Invalid JSON")
+        self.assertContains(response, "matched_template")
+        self.assertContains(response, "4995147")
+
+    def test_list_renders_sample_run_button(self):
+        from correspondants.models import CapabilitySampleMail
+
+        CapabilitySampleMail.objects.create(
+            capability=self.capability, label="N1", content=self.sample_content
+        )
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Run")
+        self.assertContains(response, "spinner")
+        self.assertContains(response, 'name="sample_content"')
+
+
+class CorrespondantCredentialsTests(TestCase):
+    def setUp(self):
+        Correspondant.objects.create(
+            name="freelancermap",
+            base_url="https://www.freelancermap.de",
+            login="romain",
+            password="secret-123",
+        )
+
+    def edit(self, **overrides):
+        data = {
+            "name": "freelancermap",
+            "display_name": "",
+            "base_url": "https://www.freelancermap.de",
+            "login": "romain",
+            "password": "",
+            "enabled": "on",
+            "notes": "",
+        }
+        data.update(overrides)
+        return self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            data,
+        )
+
+    def test_login_password_saved_on_create(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "other-site",
+                "display_name": "",
+                "base_url": "https://other.example",
+                "login": "jane",
+                "password": "pw-456",
+                "enabled": "on",
+                "notes": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        created = Correspondant.objects.get(name="other-site")
+        self.assertEqual(created.login, "jane")
+        self.assertEqual(created.password, "pw-456")
+
+    def test_blank_password_keeps_existing_one(self):
+        self.edit(password="")
+        correspondant = Correspondant.objects.get(name="freelancermap")
+        self.assertEqual(correspondant.password, "secret-123")
+
+    def test_new_password_overwrites(self):
+        self.edit(password="new-pw")
+        correspondant = Correspondant.objects.get(name="freelancermap")
+        self.assertEqual(correspondant.password, "new-pw")
+
+    def test_password_never_rendered(self):
+        response = self.client.get(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "secret-123")
+        self.assertContains(response, 'name="password"')
+
+    def test_password_not_in_list(self):
+        response = self.client.get("/")
+        self.assertNotContains(response, "secret-123")
+
+
+class ToggleSwitchTests(TestCase):
+    def setUp(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        self.correspondant = Correspondant.objects.create(
+            name="freelancermap", base_url="https://www.freelancermap.de"
+        )
+        self.capability = Capability.objects.create(
+            correspondant=self.correspondant,
+            capability_type=CapabilityType.objects.get(slug="parse-mail"),
+            name="pobox",
+            config=FREELANCERMAP_POBOX_NOTIFICATION_CONFIG,
+        )
+
+    def test_summary_renders_switches(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode().count("summary-switch"), 2)
+        self.assertContains(response, 'role="switch"')
+
+    def test_toggle_correspondant(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_toggle", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.correspondant.refresh_from_db()
+        self.assertFalse(self.correspondant.enabled)
+
+    def test_toggle_capability(self):
+        response = self.client.post(
+            reverse(
+                "correspondants:capability_toggle",
+                args=["freelancermap", "pobox"],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.capability.refresh_from_db()
+        self.assertFalse(self.capability.enabled)
+
+    def test_toggle_back_on(self):
+        self.correspondant.enabled = False
+        self.correspondant.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:correspondant_toggle", args=["freelancermap"])
+        )
+        self.correspondant.refresh_from_db()
+        self.assertTrue(self.correspondant.enabled)
+
+    def test_edit_does_not_reset_enabled_state(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        # capability disabled via the toggle stays disabled through an edit
+        self.capability.enabled = False
+        self.capability.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:capability_edit", args=["freelancermap", "pobox"]),
+            {
+                "name": "pobox",
+                "capability_type": str(CapabilityType.objects.get(slug="parse-mail").pk),
+                "config": json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
+                "priority": "0",
+                "description": "",
+            },
+        )
+        self.capability.refresh_from_db()
+        self.assertFalse(self.capability.enabled)
+
+    def test_edit_correspondant_does_not_reset_enabled_state(self):
+        self.correspondant.enabled = False
+        self.correspondant.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            {
+                "name": "freelancermap",
+                "display_name": "",
+                "base_url": "https://www.freelancermap.de",
+                "login": "",
+                "password": "",
+                "notes": "",
+            },
+        )
+        self.correspondant.refresh_from_db()
+        self.assertFalse(self.correspondant.enabled)

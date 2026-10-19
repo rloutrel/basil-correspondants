@@ -1,0 +1,287 @@
+# Basil — correspondants component — German translations.
+# This file is distributed under the MIT license.
+msgid ""
+msgstr ""
+"Project-Id-Version: basil-correspondants\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "correspondant"
+msgstr ""
+
+msgid "correspondants"
+msgstr ""
+
+msgid "capability type"
+msgstr ""
+
+msgid "capability types"
+msgstr ""
+
+msgid "capability"
+msgstr ""
+
+msgid "capabilities"
+msgstr ""
+
+msgid "capability execution"
+msgstr ""
+
+msgid "capability executions"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Display name"
+msgstr ""
+
+msgid "Base URL"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Notes"
+msgstr ""
+
+msgid "Slug"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Input schema"
+msgstr ""
+
+msgid "Output schema"
+msgstr ""
+
+msgid "Config schema"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Input"
+msgstr ""
+
+msgid "Output"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "Duration (ms)"
+msgstr ""
+
+msgid "Only lowercase letters, digits and hyphens are allowed."
+msgstr ""
+
+msgid "Correspondants"
+msgstr ""
+
+msgid "Toggle dark mode"
+msgstr ""
+
+msgid "No capability configured."
+msgstr ""
+
+msgid "No correspondant configured yet."
+msgstr ""
+
+msgid "External sites the house corresponds with, each with its capabilities."
+msgstr ""
+
+msgid "Add a correspondant"
+msgstr ""
+
+msgid "Add a capability"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Capability"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Configuration (JSON)"
+msgstr ""
+
+msgid "Could not save"
+msgstr ""
+
+msgid "Delete correspondant %(name)s and all its capabilities?"
+msgstr ""
+
+msgid "Delete capability %(name)s?"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Edit correspondant"
+msgstr ""
+
+msgid "Edit capability"
+msgstr ""
+
+msgid "Confirm deletion"
+msgstr ""
+
+msgid "Example configuration"
+msgstr ""
+msgid "Select a capability type to see its example."
+msgstr ""
+
+msgid "No example available."
+msgstr ""
+msgid "Test"
+msgstr ""
+
+msgid "Test capability"
+msgstr ""
+
+msgid "Mail to test (JSON or raw email)"
+msgstr ""
+
+msgid "Run the test"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Result"
+msgstr ""
+
+msgid "Paste a mail to test."
+msgstr ""
+
+msgid "Invalid JSON: %(error)s"
+msgstr ""
+
+msgid "The mail does not match the expected input format."
+msgstr ""
+msgid "Live test"
+msgstr ""
+
+msgid "Enter one or two sample mails; the result updates as you edit the JSON."
+msgstr ""
+
+msgid "Sample mail 1 (JSON or raw email)"
+msgstr ""
+
+msgid "Sample mail 2 (JSON or raw email)"
+msgstr ""
+
+msgid "The result appears here as you type."
+msgstr ""
+
+msgid "Sample"
+msgstr ""
+msgid "Check that the quotes are straight double quotes and that the JSON is complete."
+msgstr ""
+msgid "New capability"
+msgstr ""
+msgid "Delete this capability?"
+msgstr ""
+msgid "Sample mails"
+msgstr ""
+
+msgid "Saved for future tests; run each one to see the result."
+msgstr ""
+
+msgid "Show the mail"
+msgstr ""
+
+msgid "Run"
+msgstr ""
+
+msgid "Delete this sample mail?"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Notification mail"
+msgstr ""
+
+msgid "New sample mail (JSON or raw email)"
+msgstr ""
+
+msgid "Save the capability first to attach sample mails."
+msgstr ""
+
+msgid "Save the sample mail"
+msgstr ""
+
+msgid "The result appears here."
+msgstr ""
+msgid "Login"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Account login on the site."
+msgstr ""
+
+msgid "Account password on the site; never sent back to the browser."
+msgstr ""
+
+msgid "Leave blank to keep the current password."
+msgstr ""
+msgid "New correspondant"
+msgstr ""
+
+msgid "Login configured"
+msgstr ""
+
+msgid "capabilities"
+msgstr ""
+
+msgid "Leave the password blank to keep the current one."
+msgstr ""
+
+msgid "Delete this correspondant and all its capabilities?"
+msgstr ""
+msgid "Add a sample mail"
+msgstr ""
+msgid "Show the mail and result"
+msgstr ""
