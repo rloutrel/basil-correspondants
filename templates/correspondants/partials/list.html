@@ -28,13 +28,9 @@
                 onclick="event.preventDefault(); event.stopPropagation();">
           {% trans "Edit" %}
         </button>
-        <button type="button" class="summary-switch {% if correspondant.enabled %}on{% endif %}"
-                role="switch" aria-checked="{{ correspondant.enabled|yesno:'true,false' }}"
-                title="{% if correspondant.enabled %}{% trans 'Enabled' %}{% else %}{% trans 'Disabled' %}{% endif %}"
-                hx-post="{% url 'correspondants:correspondant_toggle' correspondant.name %}"
-                hx-target="#correspondant-list" hx-swap="innerHTML"
-                onclick="event.preventDefault(); event.stopPropagation();">
-        </button>
+        {% url 'correspondants:correspondant_toggle' correspondant.name as corr_toggle_url %}
+        {% include "correspondants/partials/summary_switch.html" with enabled=correspondant.enabled toggle_url=corr_toggle_url %}
+        
         <span class="accordion-chevron" aria-hidden="true"></span>
       </summary>
       <div class="accordion-body">
@@ -76,13 +72,9 @@
                   <span class="accordion-title">{{ capability.name }}</span>
                   <span class="badge neutral">{{ capability.capability_type.slug }}</span>
                   <span class="summary-frequency" title="{% trans 'Priority' %}">{{ capability.priority }}</span>
-                  <button type="button" class="summary-switch {% if capability.enabled %}on{% endif %}"
-                  role="switch" aria-checked="{{ capability.enabled|yesno:'true,false' }}"
-                  title="{% if capability.enabled %}{% trans 'Enabled' %}{% else %}{% trans 'Disabled' %}{% endif %}"
-                  hx-post="{% url 'correspondants:capability_toggle' correspondant.name capability.name %}"
-                  hx-target="#correspondant-list" hx-swap="innerHTML"
-                  onclick="event.preventDefault(); event.stopPropagation();">
-                </button>
+                  {% url 'correspondants:capability_toggle' correspondant.name capability.name as cap_toggle_url %}
+                {% include "correspondants/partials/summary_switch.html" with enabled=capability.enabled toggle_url=cap_toggle_url %}
+
                   <span class="accordion-chevron" aria-hidden="true"></span>
                 </summary>
                 <div class="accordion-body">

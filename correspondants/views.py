@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from .engines import CapabilityError, execute_capability
@@ -123,7 +124,16 @@ def correspondant_toggle(request, name):
     if request.method == "POST":
         correspondant.enabled = not correspondant.enabled
         correspondant.save(update_fields=["enabled"])
-    return _list_refresh(request)
+    return render(
+        request,
+        "correspondants/partials/summary_switch.html",
+        {
+            "enabled": correspondant.enabled,
+            "toggle_url": reverse(
+                "correspondants:correspondant_toggle", args=[name]
+            ),
+        },
+    )
 
 
 def capability_toggle(request, name, capability_name):
@@ -133,7 +143,17 @@ def capability_toggle(request, name, capability_name):
     if request.method == "POST":
         capability.enabled = not capability.enabled
         capability.save(update_fields=["enabled"])
-    return _list_refresh(request)
+    return render(
+        request,
+        "correspondants/partials/summary_switch.html",
+        {
+            "enabled": capability.enabled,
+            "toggle_url": reverse(
+                "correspondants:capability_toggle",
+                args=[name, capability_name],
+            ),
+        },
+    )
 
 
 def capability_delete(request, name, capability_name):
