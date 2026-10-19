@@ -33,11 +33,6 @@
       <input type="number" name="priority" required
              value="{% if draft_values %}{{ draft_values.priority }}{% else %}{{ capability.priority|default:0 }}{% endif %}">
     </label>
-    <label class="inline-field switch-field span-6">
-      <span class="inline-label">{% trans "Enabled" %}</span>
-      <input type="checkbox" name="enabled"
-             {% if draft_values %}{% if draft_values.enabled %}checked{% endif %}{% elif not capability or capability.enabled %}checked{% endif %}>
-    </label>
     <label class="inline-field span-12">
       <span class="inline-label">{% trans "Description" %}</span>
       <input type="text" name="description"

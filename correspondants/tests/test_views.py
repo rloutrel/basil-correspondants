@@ -525,3 +525,39 @@ class ToggleSwitchTests(TestCase):
         )
         self.correspondant.refresh_from_db()
         self.assertTrue(self.correspondant.enabled)
+
+    def test_edit_does_not_reset_enabled_state(self):
+        from correspondants.catalog import FREELANCERMAP_POBOX_NOTIFICATION_CONFIG
+
+        # capability disabled via the toggle stays disabled through an edit
+        self.capability.enabled = False
+        self.capability.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:capability_edit", args=["freelancermap", "pobox"]),
+            {
+                "name": "pobox",
+                "capability_type": str(CapabilityType.objects.get(slug="parse-mail").pk),
+                "config": json.dumps(FREELANCERMAP_POBOX_NOTIFICATION_CONFIG),
+                "priority": "0",
+                "description": "",
+            },
+        )
+        self.capability.refresh_from_db()
+        self.assertFalse(self.capability.enabled)
+
+    def test_edit_correspondant_does_not_reset_enabled_state(self):
+        self.correspondant.enabled = False
+        self.correspondant.save(update_fields=["enabled"])
+        self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            {
+                "name": "freelancermap",
+                "display_name": "",
+                "base_url": "https://www.freelancermap.de",
+                "login": "",
+                "password": "",
+                "notes": "",
+            },
+        )
+        self.correspondant.refresh_from_db()
+        self.assertFalse(self.correspondant.enabled)

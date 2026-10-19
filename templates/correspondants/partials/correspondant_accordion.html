@@ -39,11 +39,6 @@
       <span class="inline-label">{% trans "Password" %}</span>
       <input type="text" name="password" autocomplete="off" placeholder="(unchanged)">
     </label>
-    <label class="inline-field switch-field span-4">
-      <span class="inline-label">{% trans "Enabled" %}</span>
-      <input type="checkbox" name="enabled"
-             {% if draft_values %}{% if draft_values.enabled %}checked{% endif %}{% elif not correspondant or correspondant.enabled %}checked{% endif %}>
-    </label>
     <label class="inline-field span-12">
       <span class="inline-label">{% trans "Notes" %}</span>
       <textarea name="notes" rows="2">{% if draft_values %}{{ draft_values.notes }}{% else %}{{ correspondant.notes|default:'' }}{% endif %}</textarea>

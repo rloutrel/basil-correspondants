@@ -31,7 +31,7 @@ class CorrespondantForm(forms.ModelForm):
         model = Correspondant
         fields = [
             "name", "display_name", "base_url", "login", "password",
-            "enabled", "notes",
+            "notes",
         ]
         widgets = {
             "notes": forms.Textarea(attrs={"rows": 3}),
@@ -63,7 +63,7 @@ class CapabilityForm(forms.ModelForm):
 
     class Meta:
         model = Capability
-        fields = ["name", "capability_type", "config", "enabled", "priority", "description"]
+        fields = ["name", "capability_type", "config", "priority", "description"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 2}),
         }
