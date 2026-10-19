@@ -372,6 +372,21 @@ class CapabilityPreviewTests(TestCase):
         response = self.client.get(self.preview_url)
         self.assertEqual(response.status_code, 405)
 
+    def test_new_sample_mail_inserted_first(self):
+        from correspondants.models import CapabilitySampleMail
+
+        CapabilitySampleMail.objects.create(
+            capability=self.capability, label="Old first", content="{}",
+        )
+        add_url = reverse(
+            "correspondants:sample_mail_add",
+            args=["freelancermap", "freelancermap-pobox-notification"],
+        )
+        self.client.post(add_url, {"sample_label": "New", "sample_content": "{}"})
+        samples = list(CapabilitySampleMail.objects.all())
+        self.assertEqual(samples[0].label, "New")
+        self.assertEqual(samples[0].position, 0)
+
     def test_preview_accepts_typographic_quotes(self):
         curly_sample = self.sample_content.replace('"', "\u201c")
         curly_config = self.config_json.replace('"', "\u201c")

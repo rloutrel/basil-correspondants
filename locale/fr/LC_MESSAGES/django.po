@@ -304,3 +304,5 @@ msgstr "Laissez le mot de passe vide pour conserver l'actuel."
 
 msgid "Delete this correspondant and all its capabilities?"
 msgstr "Supprimer ce correspondant et toutes ses capacités ?"
+msgid "Add a sample mail"
+msgstr "Ajouter un mail type"

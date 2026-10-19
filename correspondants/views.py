@@ -1,6 +1,7 @@
 import json
 
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
@@ -225,12 +226,12 @@ def sample_mail_add(request, name, capability_name):
     )
     content = request.POST.get("sample_content", "").strip()
     if content:
-        position = capability.sample_mails.count()
+        capability.sample_mails.update(position=models.F("position") + 1)
         CapabilitySampleMail.objects.create(
             capability=capability,
             label=request.POST.get("sample_label", "").strip(),
             content=content,
-            position=position,
+            position=0,
         )
     return _list_refresh(request)
 

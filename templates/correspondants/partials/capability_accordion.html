@@ -70,42 +70,16 @@
 </form>
 
 {% if capability %}
-  <div class="preview-section">
-    <h3>{% trans "Sample mails" %}</h3>
-    <p class="muted">{% trans "Saved for future tests; run each one to see the result." %}</p>
+  <div class="preview-section" x-data="{ adding: false }">
+    <div class="config-section-header">
+      <h3>{% trans "Sample mails" %}</h3>
+      <button type="button" class="btn round add-btn"
+              title="{% trans 'Add a sample mail' %}"
+              aria-label="{% trans 'Add a sample mail' %}"
+              @click="adding = !adding">+</button>
+    </div>
 
-    {% for sample in capability.sample_mails.all %}
-      <div class="sample-row">
-        <div class="sample-content">
-          <div class="sample-label">{{ sample.label|default:sample.pk }}</div>
-          <details class="sample-details">
-            <summary>{% trans "Show the mail" %}</summary>
-            <pre class="sample-raw">{{ sample.content }}</pre>
-          </details>
-        </div>
-        <div class="sample-result" id="sample-result-{{ sample.pk }}">
-          <button type="button" class="btn small"
-                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
-                  hx-vals='{"sample_id": "{{ sample.pk }}"}'
-                  hx-include="#config-{{ capability.pk }}"
-                  hx-target="#sample-result-{{ sample.pk }}"
-                  hx-swap="innerHTML"
-                  hx-indicator="#sample-spinner-{{ sample.pk }}">
-            {% trans "Run" %}
-          </button>
-          <span id="sample-spinner-{{ sample.pk }}" class="htmx-indicator spinner"></span>
-        </div>
-        <form class="inline-form"
-              hx-post="{% url 'correspondants:sample_mail_delete' correspondant_name capability.name sample.pk %}"
-              hx-target="#correspondant-list" hx-swap="innerHTML">
-          {% csrf_token %}
-          <button type="submit" class="btn small danger"
-                  hx-confirm="{% trans 'Delete this sample mail?' %}">{% trans "Delete" %}</button>
-        </form>
-      </div>
-    {% endfor %}
-
-    <form class="sample-add"
+    <form class="sample-add" x-show="adding" x-cloak
           hx-post="{% url 'correspondants:sample_mail_add' correspondant_name capability.name %}"
           hx-target="#correspondant-list" hx-swap="innerHTML">
       {% csrf_token %}
@@ -121,6 +95,42 @@
       </div>
       <button type="submit" class="btn small">{% trans "Save the sample mail" %}</button>
     </form>
+
+    {% for sample in capability.sample_mails.all %}
+      <div class="sample-row">
+        <div class="sample-content">
+          <div class="sample-label">{{ sample.label|default:sample.pk }}</div>
+          <details class="sample-details">
+            <summary>{% trans "Show the mail" %}</summary>
+            <pre class="sample-raw">{{ sample.content }}</pre>
+          </details>
+        </div>
+        <div class="sample-result" id="sample-result-{{ sample.pk }}">
+          <p class="muted sample-placeholder">{% trans "The result appears here." %}</p>
+        </div>
+        <div class="sample-actions">
+          <button type="button" class="icon-btn sample-run"
+                  title="{% trans 'Run' %}" aria-label="{% trans 'Run' %}"
+                  hx-post="{% url 'correspondants:capability_preview' correspondant_name %}"
+                  hx-vals='{"sample_id": "{{ sample.pk }}"}'
+                  hx-include="#config-{{ capability.pk }}"
+                  hx-target="#sample-result-{{ sample.pk }}"
+                  hx-swap="innerHTML"
+                  hx-indicator="this">
+            <span class="icon-run">&#9654;</span>
+            <span class="spinner mini"></span>
+          </button>
+          <form class="inline-form"
+                hx-post="{% url 'correspondants:sample_mail_delete' correspondant_name capability.name sample.pk %}"
+                hx-target="#correspondant-list" hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="icon-btn sample-delete"
+                    title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"
+                    hx-confirm="{% trans 'Delete this sample mail?' %}">&#128465;</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
   </div>
 {% else %}
   <p class="muted preview-section">{% trans "Save the capability first to attach sample mails." %}</p>

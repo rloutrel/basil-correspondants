@@ -281,3 +281,5 @@ msgstr ""
 
 msgid "Delete this correspondant and all its capabilities?"
 msgstr ""
+msgid "Add a sample mail"
+msgstr ""

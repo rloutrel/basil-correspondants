@@ -308,3 +308,58 @@ table.capabilities .btn { margin-left: 0.3rem; }
 .accordion.nested > summary { padding: 0.5rem 0.8rem; font-weight: normal; }
 .summary-cta { margin-left: auto; }
 summary .btn { pointer-events: auto; }
+
+/* Sample mails: + button header, icon actions, run spinner */
+.config-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.config-section-header h3 { margin: 0; }
+.btn.round {
+  width: 1.6rem; height: 1.6rem;
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  flex: none;
+}
+.sample-add { margin-bottom: 0.8rem; }
+.sample-actions {
+  display: flex;
+  gap: 0.3rem;
+  align-items: flex-start;
+  margin-left: auto;
+}
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0.45rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover { color: var(--primary); border-color: var(--primary); }
+.icon-btn.sample-delete:hover { color: var(--error); border-color: var(--error); }
+.icon-btn .spinner { display: none; }
+.icon-btn.htmx-request .icon-run { display: none; }
+.icon-btn.htmx-request .spinner {
+  display: inline-block;
+  width: 0.85rem; height: 0.85rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.sample-row { align-items: stretch; }
+.sample-placeholder { font-size: 0.8rem; }
