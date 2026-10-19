@@ -269,16 +269,30 @@ table.capabilities .btn { margin-left: 0.3rem; }
 
 /* Sample mails in the capability accordion */
 .sample-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.8rem;
-  align-items: flex-start;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
   padding: 0.6rem 0.8rem;
   margin-bottom: 0.6rem;
+  position: relative;
 }
-.sample-content { flex: 1; min-width: 0; }
+.sample-content { min-width: 0; }
+.sample-result { min-width: 0; display: flex; flex-direction: column; }
+.sample-result .test-result { margin: 0.2rem 0 0; flex: 1; }
+.sample-actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  display: flex;
+  gap: 0.3rem;
+}
+.sample-actions .icon-btn {
+  background: var(--bg);
+  box-shadow: 0 0 0 2px var(--bg);
+}
 .sample-label { font-weight: 600; font-size: 0.9rem; }
 .sample-details summary { color: var(--text-muted); font-size: 0.85rem; cursor: pointer; }
 .sample-raw {
@@ -286,8 +300,8 @@ table.capabilities .btn { margin-left: 0.3rem; }
   padding: 0.5rem; font-size: 0.75rem; max-height: 14rem; overflow: auto;
   white-space: pre-wrap; word-break: break-word; margin: 0.4rem 0 0;
 }
-.sample-result { min-width: 14rem; max-width: 24rem; }
-.sample-result .test-result { max-height: 14rem; overflow: auto; }
+.sample-result .test-result { max-height: 16rem; overflow: auto; }
+.sample-result .error-message { margin: 0.2rem 0 0; }
 .spinner {
   display: inline-block;
   width: 1rem; height: 1rem;
@@ -330,12 +344,7 @@ summary .btn { pointer-events: auto; }
   flex: none;
 }
 .sample-add { margin-bottom: 0.8rem; }
-.sample-actions {
-  display: flex;
-  gap: 0.3rem;
-  align-items: flex-start;
-  margin-left: auto;
-}
+
 .icon-btn {
   background: none;
   border: 1px solid var(--border);
@@ -361,5 +370,4 @@ summary .btn { pointer-events: auto; }
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-.sample-row { align-items: stretch; }
 .sample-placeholder { font-size: 0.8rem; }
