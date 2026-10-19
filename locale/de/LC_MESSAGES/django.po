@@ -253,3 +253,17 @@ msgstr ""
 
 msgid "The result appears here."
 msgstr ""
+msgid "Login"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Account login on the site."
+msgstr ""
+
+msgid "Account password on the site; never sent back to the browser."
+msgstr ""
+
+msgid "Leave blank to keep the current password."
+msgstr ""

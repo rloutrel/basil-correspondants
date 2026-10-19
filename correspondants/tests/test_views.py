@@ -395,3 +395,69 @@ class CapabilityPreviewTests(TestCase):
         self.assertContains(response, "Run")
         self.assertContains(response, "spinner")
         self.assertContains(response, 'name="sample_content"')
+
+
+class CorrespondantCredentialsTests(TestCase):
+    def setUp(self):
+        Correspondant.objects.create(
+            name="freelancermap",
+            base_url="https://www.freelancermap.de",
+            login="romain",
+            password="secret-123",
+        )
+
+    def edit(self, **overrides):
+        data = {
+            "name": "freelancermap",
+            "display_name": "",
+            "base_url": "https://www.freelancermap.de",
+            "login": "romain",
+            "password": "",
+            "enabled": "on",
+            "notes": "",
+        }
+        data.update(overrides)
+        return self.client.post(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"]),
+            data,
+        )
+
+    def test_login_password_saved_on_create(self):
+        response = self.client.post(
+            reverse("correspondants:correspondant_create"),
+            {
+                "name": "other-site",
+                "display_name": "",
+                "base_url": "https://other.example",
+                "login": "jane",
+                "password": "pw-456",
+                "enabled": "on",
+                "notes": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        created = Correspondant.objects.get(name="other-site")
+        self.assertEqual(created.login, "jane")
+        self.assertEqual(created.password, "pw-456")
+
+    def test_blank_password_keeps_existing_one(self):
+        self.edit(password="")
+        correspondant = Correspondant.objects.get(name="freelancermap")
+        self.assertEqual(correspondant.password, "secret-123")
+
+    def test_new_password_overwrites(self):
+        self.edit(password="new-pw")
+        correspondant = Correspondant.objects.get(name="freelancermap")
+        self.assertEqual(correspondant.password, "new-pw")
+
+    def test_password_never_rendered(self):
+        response = self.client.get(
+            reverse("correspondants:correspondant_edit", args=["freelancermap"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "secret-123")
+        self.assertContains(response, 'name="password"')
+
+    def test_password_not_in_list(self):
+        response = self.client.get("/")
+        self.assertNotContains(response, "secret-123")

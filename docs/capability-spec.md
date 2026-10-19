@@ -53,6 +53,8 @@ A configured external site.
 | `name` | `CharField` | `max_length=64`, `unique=True`, slug pattern (`^[a-z0-9][a-z0-9-]*$`, validated), used in URLs and the MCP resource URI |
 | `display_name` | `CharField` | `max_length=128`, `blank=True` (defaults to `name` in display contexts) |
 | `base_url` | `URLField` | root URL of the site, used to resolve relative URL templates |
+| `login` | `CharField` | `max_length=255`, `blank=True` — account login on the site, used by authenticated capabilities (`read-page` behind a login) |
+| `password` | `CharField` | `max_length=255`, `blank=True` — account password on the site; never rendered back to the browser (masked text input, blank keeps the stored value) |
 | `enabled` | `BooleanField` | `default=True`; disabled correspondants are excluded from the capacities listing and from MCP exposure |
 | `notes` | `TextField` | `blank=True` |
 | `created_at` | `DateTimeField` | `auto_now_add=True` |

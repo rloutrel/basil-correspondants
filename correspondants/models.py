@@ -17,6 +17,13 @@ class Correspondant(models.Model):
     )
     display_name = models.CharField(_("Display name"), max_length=128, blank=True)
     base_url = models.URLField(_("Base URL"))
+    login = models.CharField(
+        _("Login"), max_length=255, blank=True, help_text=_("Account login on the site.")
+    )
+    password = models.CharField(
+        _("Password"), max_length=255, blank=True,
+        help_text=_("Account password on the site; never sent back to the browser."),
+    )
     enabled = models.BooleanField(_("Enabled"), default=True)
     notes = models.TextField(_("Notes"), blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

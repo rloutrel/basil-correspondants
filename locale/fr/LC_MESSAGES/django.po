@@ -274,3 +274,19 @@ msgstr "Enregistrer le mail type"
 
 msgid "The result appears here."
 msgstr "Le résultat apparaît ici."
+msgid "Login"
+msgstr "Identifiant"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Account login on the site."
+msgstr "Identifiant du compte sur le site."
+
+msgid ""
+"Account password on the site; never sent back to the browser."
+msgstr ""
+"Mot de passe du compte sur le site ; jamais renvoyé au navigateur."
+
+msgid "Leave blank to keep the current password."
+msgstr "Laissez vide pour conserver le mot de passe actuel."
